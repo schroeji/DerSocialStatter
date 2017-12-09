@@ -1,6 +1,6 @@
 import psycopg2
 
-class DatabaseConnection:
+class DatabaseConnection(object):
     """
     Class for PostgreSQL connections using psycopg2
     http://initd.org/psycopg/docs/usage.html
@@ -60,6 +60,9 @@ class DatabaseConnection:
         self.conn.commit()
 
     def get_all_rows(self):
+        """
+        return a list of all rows in the data table
+        """
         self.cur.execute("SELECT * FROM data;")
         return self.cur.fetchall()
 
