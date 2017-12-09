@@ -2,6 +2,7 @@ import praw
 import datetime
 import numpy as np
 import json
+from database import DatabaseConnection
 
 class RedditStats(object):
     def __init__(self):
@@ -61,11 +62,27 @@ class RedditStats(object):
         # print (first_timestamp, current_timestamp)
         return comments_per_sec_in_on_day
 
+    def compile_dict(self, subreddit):
+        d = {}
+        d["start_time"] = datetime.datetime.fromtimestamp(int(self.default_start))
+        d["end_time"] = datetime.datetime.fromtimestamp(int(self.default_end))
+        d["subreddit"] = subreddit
+        d["subscribers"] = self.get_num_subscribers(subreddit)
+        d["submissions"] = self.get_num_submissions(subreddit)
+        d["comment_rate"] = self.get_num_comments_per_hour(subreddit)
+        return d
+
 # substratumnetwork
 # 
+def main():
+    stat = RedditStats()
+    db = DatabaseConnection("postgres", "postgres")
+    item = stat.compile_dict("potcoin")
+    db.insert(item)
+    db.get_all_rows()
+    db.close()
+    # print (stat.get_num_submissions('potcoin'))
+    # print (stat.get_num_comments_per_hour('potcoin'))
 
-stat = RedditStats()
-print (stat.get_num_submissions('potcoin'))
-# print (stat.get_num_comments_per_hour('powerledger'))
-# print (stat.get_num_subscribers('substratum'))
-print (stat.get_num_comments_per_hour('potcoin'))
+if __name__ == "__main__":
+    main()
