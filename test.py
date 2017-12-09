@@ -79,7 +79,7 @@ def main():
     db = DatabaseConnection("postgres", "postgres")
     item = stat.compile_dict("potcoin")
     db.insert(item)
-    db.get_all_rows()
+    print(db.get_all_rows())
     db.close()
     # print (stat.get_num_submissions('potcoin'))
     # print (stat.get_num_comments_per_hour('potcoin'))

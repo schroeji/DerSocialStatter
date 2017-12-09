@@ -53,8 +53,7 @@ class DatabaseConnection:
 
     def get_all_rows(self):
         self.cur.execute("SELECT * FROM data;")
-        print(self.cur.rowcount)
-        print(self.cur.fetchone())
+        return self.cur.fetchall()
 
     def close(self):
         """
