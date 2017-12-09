@@ -30,6 +30,14 @@ class DatabaseConnection:
         self.conn.commit()
         print("Created data table.")
 
+    def delete_table(self):
+        """
+        drop the data table
+        """
+        self.cur.execute("DROP TABLE data;")
+        self.conn.commit()
+        print("Dropped data table.")
+
     def insert(self, data_dict):
         """
         insert a data item into the table

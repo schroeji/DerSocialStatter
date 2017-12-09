@@ -2,7 +2,6 @@ import praw
 import datetime
 import numpy as np
 import json
-from database import DatabaseConnection
 
 class RedditStats(object):
     def __init__(self):
@@ -71,18 +70,3 @@ class RedditStats(object):
         d["submissions"] = self.get_num_submissions(subreddit)
         d["comment_rate"] = self.get_num_comments_per_hour(subreddit)
         return d
-
-# substratumnetwork
-# 
-def main():
-    stat = RedditStats()
-    db = DatabaseConnection("postgres", "postgres")
-    item = stat.compile_dict("potcoin")
-    db.insert(item)
-    print(db.get_all_rows())
-    db.close()
-    # print (stat.get_num_submissions('potcoin'))
-    # print (stat.get_num_comments_per_hour('potcoin'))
-
-if __name__ == "__main__":
-    main()
