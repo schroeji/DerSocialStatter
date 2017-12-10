@@ -1,8 +1,7 @@
+import os.path
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
-
-# subreddit_list = ["dogecoin", "iota", "litecoin", "monero", "nem", "potcoin", "substratumnetwork"]
 
 def collect(subreddit_list):
     stat = RedditStats()
@@ -25,6 +24,24 @@ def create_subreddit_list():
     subreddit_list = stat.find_subreddits(names)
     return subreddit_list
 
+def write_subs_to_file(path, subreddit_list):
+    string = "\n".join(subreddit_list)
+    f = open("subreddits.txt", "w")
+    f.write(string)
+    f.close()
+
+def read_subs_from_file(path):
+    f = open(path, "r")
+    inp = f.read()
+    subs = inp.split("\n")
+    return subs[:-1]
+
 if __name__ == "__main__":
-    subs = create_subreddit_list()
+    file_name = "subreddits.txt"
+    if os.path.exists(file_name):
+        subs = read_subs_from_file(file_name)
+    else :
+        subs = create_subreddit_list()
+        write_subs_to_file(file_name, subs)
+
     collect(subs)
