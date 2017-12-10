@@ -1,4 +1,5 @@
 import os.path
+import datetime
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
@@ -6,8 +7,10 @@ from coinmarketcap import CoinCap
 def collect(subreddit_list):
     stat = RedditStats()
     db = DatabaseConnection("postgres", "postgres")
+    start_time = datetime.datetime.now() - datetime.timedelta(hours=1)
+    start_time = start_time.strftime("%s")
     for subreddit in subreddit_list:
-        db.insert(stat.compile_dict(subreddit))
+        db.insert(stat.compile_dict(subreddit, start=start_time))
         print("Got stats for:", subreddit)
     db.close()
 
@@ -26,7 +29,7 @@ def create_subreddit_list():
 
 def write_subs_to_file(path, subreddit_list):
     string = "\n".join(subreddit_list)
-    f = open("subreddits.txt", "w")
+    f = open(path, "w")
     f.write(string)
     f.close()
 

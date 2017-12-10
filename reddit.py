@@ -38,32 +38,34 @@ class RedditStats(object):
     def get_num_subscribers(self, subreddit):
         return (self.reddit.subreddit(subreddit).subscribers)
 
-    def get_num_comments_per_hour(self, subreddit):
+    def get_num_comments_per_hour(self, subreddit, start=None):
+        if start is None:
+            start = self.default_start
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
         cnt = 0
         for c in comm:
             if cnt == 0:
                 first_timestamp = c.created
-            # t = datetime.datetime.fromtimestamp(int(c.created)).strftime('%Y-%m-%d %H:%M:%S')
-            # print (t, c.created, self.default_start)
             current_timestamp = c.created
             cnt += 1
-            if int(c.created) < int(self.default_start):
+            if int(c.created) < int(start):
                 break
         if cnt <= 1:
-            # raise ValueError("Shit coin!, no comments in one fucking day!!!!!!!")
             return 0.
-        comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
+        # comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
+        comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end) - int(start))
         return comments_per_sec_in_on_day*3600
 
-    def compile_dict(self, subreddit):
+    def compile_dict(self, subreddit, start=None):
+        if start is None:
+            start = self.default_start
         d = {}
-        d["start_time"] = datetime.datetime.fromtimestamp(int(self.default_start))
+        d["start_time"] = datetime.datetime.fromtimestamp(int(start))
         d["end_time"] = datetime.datetime.fromtimestamp(int(self.default_end))
         d["subreddit"] = subreddit
         d["subscribers"] = self.get_num_subscribers(subreddit)
-        d["submissions"] = self.get_num_submissions(subreddit)
-        d["comment_rate"] = self.get_num_comments_per_hour(subreddit)
+        d["submissions"] = self.get_num_submissions(subreddit, start=start)
+        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, start=start)
         return d
 
     def find_subreddits(self, coin_name_list):
