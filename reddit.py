@@ -51,8 +51,9 @@ class RedditStats(object):
             if int(c.created) < int(self.default_start):
                 # print (t, c.created, self.default_start)
                 break
-        # if cnt <= 1:
+        if cnt <= 1:
             # raise ValueError("Shit coin!, no comments in one fucking day!!!!!!!")
+            return 0.0
         comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
         # print (cnt)
         # print (first_timestamp, current_timestamp)
@@ -77,18 +78,29 @@ class RedditStats(object):
         pattern = "|".join(keywords)
         regex = re.compile(pattern, re.I)
         for name in coin_name_list:
-            print(name)
+            sub_found = True
             try:
                 sub = self.reddit.subreddit(name)
                 public_description = str(sub.public_description)
                 description = str(sub.description)
             except:
-                print("Sub {} does not exist".format(name))
-                continue
-            if re.search(regex, description) == None and re.search(regex, public_description) == None:
+                sub_found = False
+                # print("Sub {} does not exist".format(name))
+
+            if not sub_found or re.search(regex, description) == None and re.search(regex, public_description) == None:
                 # no keyword appears in subreddit description
                 # it's probably not crypto coin related
-                print("Sub {} is not crypto related.".format(name))
+                print("Sub {} not found or is not crypto related.".format(name))
+                # finding alternatives
+                # works poorly so its deactivated
+                # print("Alternatives:")
+                # candidates = self.reddit.subreddits.search_by_name(name, include_nsfw=False)
+                # for candidate in candidates:
+                    # public_description = str(candidate.public_description)
+                    # description = str(candidate.description)
+                    # if re.search(regex, description) == None and re.search(regex, public_description) == None:
+                        # print(candidate.display_name)
+                        # subreddit_names.append(name)
             else:
                 subreddit_names.append(name)
         return subreddit_names
