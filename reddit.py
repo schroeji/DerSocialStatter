@@ -49,13 +49,10 @@ class RedditStats(object):
             current_timestamp = c.created
             cnt += 1
             if int(c.created) < int(self.default_start):
-                # print (t, c.created, self.default_start)
                 break
-        # if cnt <= 1:
-            # raise ValueError("Shit coin!, no comments in one fucking day!!!!!!!")
+        if cnt <= 1:
+            return 0
         comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
-        # print (cnt)
-        # print (first_timestamp, current_timestamp)
         return comments_per_sec_in_on_day*3600
 
     def compile_dict(self, subreddit):
