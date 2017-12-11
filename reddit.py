@@ -3,7 +3,6 @@ import datetime
 import numpy as np
 import json
 import re
-import unicodedata
 
 class RedditStats(object):
 

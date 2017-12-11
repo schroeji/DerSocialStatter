@@ -1,5 +1,6 @@
 import os.path
 import argparse
+import datetime
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
@@ -7,8 +8,9 @@ from coinmarketcap import CoinCap
 def collect(subreddit_list):
     stat = RedditStats()
     db = DatabaseConnection("postgres", "postgres", "asdfgh")
+    start = datetime.datetime.now() - datetime.timedelta(hours=1)
     for subreddit in subreddit_list:
-        db.insert(stat.compile_dict(subreddit))
+        db.insert(stat.compile_dict(subreddit, start))
         print("Got stats for:", subreddit)
     db.close()
 
@@ -37,7 +39,7 @@ def read_subs_from_file(path):
     subs = inp.split("\n")
     return subs[:-1]
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--find_subs", default=0, type=int, action='store',
                         help="Find crypto coin subreddits (overwrites subreddits.txt).")
@@ -48,7 +50,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # -----------------------------------
 
-    print(args)
     file_name = "subreddits.txt"
     if args.find_subs > 0:
         subs = create_subreddit_list(args.find_subs)
@@ -67,3 +68,7 @@ if __name__ == "__main__":
         else :
             print("Collect called but 'subreddits.txt' does not exist.")
             print("Run --find_subs first.")
+
+
+if __name__ == "__main__":
+    main()
