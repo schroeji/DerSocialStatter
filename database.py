@@ -6,9 +6,9 @@ class DatabaseConnection(object):
     http://initd.org/psycopg/docs/usage.html
     """
 
-    def __init__(self, dbname, user):
+    def __init__(self, dbname, user, password):
         try:
-            self.conn = psycopg2.connect("dbname={} user={}".format(dbname, user))
+            self.conn = psycopg2.connect(dbname=dbname, user=user, password=password, host="localhost")
             self.cur = self.conn.cursor()
             if (not self.table_exists()):
                 self.create_table()
