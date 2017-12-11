@@ -95,8 +95,8 @@ class DatabaseConnection(object):
             List of Tuples containing metrics from subreddit, time is decreasing
         """
         if timeinterval is None:
-            querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=\'{}\' \
+            querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
                     AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
-                    ORDER BY end_time DESC LIMIT 2".format(subreddit)
-        self.cur.execute(querystr)
+                    ORDER BY end_time DESC LIMIT 2"
+        self.cur.execute(querystr, (subreddit,))
         return self.cur.fetchall()
