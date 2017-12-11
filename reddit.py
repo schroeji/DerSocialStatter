@@ -72,9 +72,9 @@ class RedditStats(object):
         """
         subreddit_names = []
         keywords = ["crypto", "blockchain", "decentral", "currency", "coin", "trading"]
-        ignore_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet"]
+        # ignore_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet"]
         pattern = "|".join(keywords)
-        regex = re.compile(pattern, re.I)
+        regex = re.compile(pattern, re.I|re.UNICODE)
         for name in coin_name_list:
             sub_found = True
             try:

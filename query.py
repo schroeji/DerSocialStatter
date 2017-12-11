@@ -25,7 +25,7 @@ def calc_mean_growth(metrics):
     return np.mean(growths)
 
 def main():
-    db = DatabaseConnection("postgres", "postgres")
+    db = DatabaseConnection("postgres", "postgres", "asdfgh")
     all_subreddits = db.get_all_subreddits()
     mean_growths = []
     for subr in all_subreddits:
@@ -38,8 +38,6 @@ def main():
     sorted_growths = sorted(mean_growths ,key=lambda subr: subr[1])
     for s in sorted_growths:
         print(s)
-
-
 
 if __name__ == "__main__":
     main()
