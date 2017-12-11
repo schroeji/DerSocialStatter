@@ -3,11 +3,13 @@ import datetime
 import numpy as np
 import json
 import re
+import os
 
 class RedditStats(object):
 
     def __init__(self):
-        with open('auth.json') as f:
+        path = os.path.dirname(os.path.realpath(__file__))
+        with open(path + '/auth.json') as f:
             auth = json.load(f)
             f.close()
 
