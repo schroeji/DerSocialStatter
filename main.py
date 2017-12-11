@@ -9,6 +9,7 @@ def collect(subreddit_list):
     stat = RedditStats()
     db = DatabaseConnection("postgres", "postgres", "asdfgh")
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
+    start = start.strftime("%s")
     for subreddit in subreddit_list:
         db.insert(stat.compile_dict(subreddit, start))
         print("Got stats for:", subreddit)
