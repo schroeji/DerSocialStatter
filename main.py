@@ -1,4 +1,5 @@
-import os.path
+import os
+import sys
 import argparse
 import datetime
 from database import DatabaseConnection
@@ -51,10 +52,12 @@ def main():
     args = parser.parse_args()
     # -----------------------------------
 
-    file_name = "subreddits.txt"
+    file_name = "/subreddits.txt"
+    path = os.path.dirname(os.path.realpath(__file__))
+    file_path = path + file_name
     if args.find_subs > 0:
         subs = create_subreddit_list(args.find_subs)
-        write_subs_to_file(file_name, subs)
+        write_subs_to_file(file_path, subs)
 
     if args.recreate_table:
         db = DatabaseConnection("postgres", "postgres", "asdfgh")
@@ -64,7 +67,7 @@ def main():
 
     if args.collect:
         if os.path.exists(file_name):
-            subs = read_subs_from_file(file_name)
+            subs = read_subs_from_file(file_path)
             collect(subs)
         else :
             print("Collect called but 'subreddits.txt' does not exist.")
