@@ -66,11 +66,11 @@ def main():
         db.close()
 
     if args.collect:
-        if os.path.exists(file_name):
+        if os.path.exists(file_path):
             subs = read_subs_from_file(file_path)
             collect(subs)
         else :
-            print("Collect called but 'subreddits.txt' does not exist.")
+            print("Collect called but {} does not exist.".format(file_name))
             print("Run --find_subs first.")
 
 
