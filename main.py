@@ -22,7 +22,7 @@ def mentions():
     subreddit_list = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet"]
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
-    l = stat.get_mentions(coin_name_array, subreddit_list, start)
+    l = stat.get_mentions(coin_name_array, subreddit_list, start, True)
     print(l)
 
 def create_subreddit_list(num):

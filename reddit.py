@@ -54,7 +54,7 @@ class RedditStats(object):
         comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end) - int(start))
         return comments_per_sec_in_on_day*3600
 
-    def get_mentions(self, coin_name_array, subreddit_list, start=None):
+    def get_mentions(self, coin_name_array, subreddit_list, start=None, include_submissions=False):
         """
         counts how often words from coin_name_tuple were mentioned in subreddits from subreddit list
         since start
@@ -74,6 +74,13 @@ class RedditStats(object):
                 for i, regex in enumerate(regex_list):
                     if not re.search(regex, comm.body) is None:
                         count_list[i] += 1
+            if include_submissions:
+                for submission in self.reddit.subreddit(sub).new():
+                    if (int(submission.created) < int(start)):
+                        break
+                    for i, regex in enumerate(regex_list):
+                        if not re.search(regex, submission.title) is None:
+                            count_list[i] += 1
         return count_list
 
     def compile_dict(self, subreddit, start=None):

@@ -50,11 +50,11 @@ def growth_in_interval(db, subreddits, start, end):
 
 
 def main():
-    db = DatabaseConnection("postgres", "postgres", "asdfgh", "192.168.178.63")
+    db = DatabaseConnection("postgres", "postgres", "asdfgh", "chumbala.duckdns.org")
     all_subreddits = db.get_all_subreddits()
     # recent_growth(db, all_subreddits)
-    start =  datetime.datetime.now() - datetime.timedelta(hours=24)
-    end =  datetime.datetime.now() - datetime.timedelta(hours=8)
+    start =  datetime.datetime.now() - datetime.timedelta(hours=12)
+    end =  datetime.datetime.now()- datetime.timedelta(hours=0)
     growth_in_interval(db, all_subreddits, start, end)
     db.close()
 
