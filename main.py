@@ -8,7 +8,7 @@ from coinmarketcap import CoinCap
 
 def collect(subreddit_list):
     stat = RedditStats()
-    db = DatabaseConnection("postgres", "postgres", "asdfgh")
+    db = DatabaseConnection("postgres", "postgres", "mongojean", "chumbala.duckdns.org")
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
     for subreddit in subreddit_list:
@@ -69,7 +69,7 @@ def main():
         write_subs_to_file(file_path, subs)
 
     if args.recreate_table:
-        db = DatabaseConnection("postgres", "postgres", "asdfgh")
+        db = DatabaseConnection("postgres", "postgres", "mongojean")
         db.delete_table()
         db.create_table()
         db.close()

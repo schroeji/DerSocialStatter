@@ -83,6 +83,14 @@ class DatabaseConnection(object):
         self.cur.execute("SELECT DISTINCT subreddit FROM data;")
         return [x[0] for x in self.cur.fetchall()]
 
+    def get_rows_for_subreddit(self, subreddit, start=None, end=None):
+        if start is None: start = datetime.datetime.fromtimestamp(0)
+        if end is None: end = datetime.datetime.now()
+        querystr = "SELECT start_time, end_time, subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
+            AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
+        self.cur.execute(querystr, (subreddit, end, start))
+        return self.cur.fetchall()
+
     def get_metrics_for_subreddit(self, subreddit, start=None, end=None):
         # TODO custom timeinterval, minimum time distance
         """
