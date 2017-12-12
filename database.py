@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 
 class DatabaseConnection(object):
     """
@@ -82,21 +83,30 @@ class DatabaseConnection(object):
         self.cur.execute("SELECT DISTINCT subreddit FROM data;")
         return [x[0] for x in self.cur.fetchall()]
 
-    def get_metrics_for_subreddit(self, subreddit, timeinterval=None):
+    def get_metrics_for_subreddit(self, subreddit, start=None, end=None):
         # TODO custom timeinterval, minimum time distance
         """
-        gets two last values from subscribers, submissions and comment_rate
+        gets all tuples of subscribers, submissions and comment_rate in the given time interval
 
         Args:
             subreddit: string
-            timeinterval: tuple of timestamp or None, if none take last and second to last timestamp
+            start: start-timestamp
+            end: end-timestamp
 
         Returns:
             List of Tuples containing metrics from subreddit, time is decreasing
+            If only one of start and end is given the other one is not constrained.
+            If neither is given returns the metrics for the last two rows in the table.
         """
-        if timeinterval is None:
+        if start is None and end is None:
             querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
                     AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
                     ORDER BY end_time DESC LIMIT 2"
-        self.cur.execute(querystr, (subreddit,))
+            self.cur.execute(querystr, (subreddit,))
+        else:
+            if start is None: start = datetime.datetime.fromtimestamp(0)
+            if end is None: end = datetime.datetime.now()
+            querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
+                    AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
+            self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()

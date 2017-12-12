@@ -5,6 +5,7 @@ from __future__ import print_function
 
 from database import DatabaseConnection
 import numpy as np
+import datetime
 
 
 # TODO better error handling
@@ -28,14 +29,18 @@ def main():
     db = DatabaseConnection("postgres", "postgres", "asdfgh")
     all_subreddits = db.get_all_subreddits()
     mean_growths = []
+    start_time = datetime.datetime.now() - datetime.timedelta(1)
+    end_time = datetime.datetime.now()
     for subr in all_subreddits:
-        metrics = db.get_metrics_for_subreddit(subr)
+        metrics = db.get_metrics_for_subreddit(subr, start=start_time, end=end_time)
+        print(metrics)
         if len(metrics) == 2:
             growth = calc_mean_growth(metrics)
             mean_growths.append((subr, growth))
+
     db.close()
 
-    sorted_growths = sorted(mean_growths ,key=lambda subr: subr[1])
+    sorted_growths = sorted(mean_growths, key=lambda subr: subr[1])
     for s in sorted_growths:
         print(s)
 
