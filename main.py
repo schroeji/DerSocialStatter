@@ -16,6 +16,15 @@ def collect(subreddit_list):
         print("Got stats for:", subreddit)
     db.close()
 
+def mentions():
+    stat = RedditStats()
+    coin_name_array = [["monero", "xmr"], ["bitcoin", "btc"], ["dash", "dash coin", "dash-coin"]]
+    subreddit_list = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet"]
+    start = datetime.datetime.now() - datetime.timedelta(hours=1)
+    start = start.strftime("%s")
+    l = stat.get_mentions(coin_name_array, subreddit_list, start)
+    print(l)
+
 def create_subreddit_list(num):
     """
     create a list of crypto coin subreddits
@@ -75,4 +84,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    mentions()
+    # main()
