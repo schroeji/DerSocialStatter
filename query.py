@@ -4,6 +4,7 @@ from __future__ import print_function
 
 
 from database import DatabaseConnection
+from settings import postgres as pg
 import numpy as np
 import datetime
 import matplotlib
@@ -75,7 +76,7 @@ def plot_growth(db, subreddit_list, start=None, end=None):
     plt.show()
 
 def main():
-    db = DatabaseConnection("postgres", "postgres", "mongojean", "chumbala.duckdns.org")
+        db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
     all_subreddits = db.get_all_subreddits()
     start =  datetime.datetime.now() - datetime.timedelta(hours=12)
     end =  datetime.datetime.now()- datetime.timedelta(hours=0)

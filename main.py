@@ -1,7 +1,8 @@
 import os
 import argparse
 import datetime
-import re
+from settings import postgres as pg
+from settings import general
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
@@ -13,7 +14,7 @@ def collect(coin_name_array):
     and the last one is the subreddit
     """
     stat = RedditStats()
-    db = DatabaseConnection("postgres", "postgres", "asdfgh", "localhost")
+    db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
     general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets"]
@@ -61,9 +62,10 @@ def read_subs_from_file(path):
     return result[:-1]
 
 def main():
+    file_path = general["subreddit_file"]
     parser = argparse.ArgumentParser()
     parser.add_argument("--find_subs", default=0, type=int, action='store',
-                        help="Find crypto coin subreddits (overwrites subreddits.txt).")
+                        help="Find crypto coin subreddits (overwrites {}).".format(file_path))
     parser.add_argument("--recreate_table", default=False, action='store_true',
                         help="Delete and recreate the data table.")
     parser.add_argument("--collect", default=False, action='store_true',
@@ -71,15 +73,12 @@ def main():
     args = parser.parse_args()
     # -----------------------------------
 
-    file_name = "/subreddits.csv"
-    path = os.path.dirname(os.path.realpath(__file__))
-    file_path = path + file_name
     if args.find_subs > 0:
         subs = create_coin_name_array(args.find_subs)
         write_subs_to_file(file_path, subs)
 
     if args.recreate_table:
-        db = DatabaseConnection("postgres", "postgres", "mongojean")
+        db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
         db.delete_table()
         db.create_table()
         db.close()
@@ -89,7 +88,7 @@ def main():
             subs = read_subs_from_file(file_path)
             collect(subs)
         else :
-            print("Collect called but {} does not exist.".format(file_name))
+            print("Collect called but {} does not exist.".format(file_path))
             print("Run --find_subs first.")
 
 if __name__ == "__main__":

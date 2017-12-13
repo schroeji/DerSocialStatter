@@ -3,13 +3,12 @@ import datetime
 import numpy as np
 import json
 import re
-import os
+from settings import reddit
 
 class RedditStats(object):
 
     def __init__(self):
-        path = os.path.dirname(os.path.realpath(__file__))
-        with open(path + '/auth.json') as f:
+        with open(reddit["auth_file"]) as f:
             auth = json.load(f)
             f.close()
 
@@ -66,7 +65,6 @@ class RedditStats(object):
         for coin_name_tuple in coin_name_array:
             pattern = r"\b|\b".join(coin_name_tuple)
             pattern = r"\b"+pattern+r"\b"
-            print(pattern)
             regex_list.append(re.compile(pattern, re.I|re.UNICODE))
         for sub in subreddit_list:
             comments = self.reddit.subreddit(sub).comments(limit=1024)
