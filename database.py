@@ -23,11 +23,11 @@ class DatabaseConnection(object):
     def create_table(self):
         """
         create the main data table
-        format: |id|start_time|end_time|subreddit|subscribers|submissions|comment_rate|
+        format: |id|start_time|end_time|subreddit|subscribers|submissions|comment_rate|mentions|
         """
         self.cur.execute("CREATE TABLE data (id serial PRIMARY KEY, start_time timestamp,"
                          "end_time timestamp, subreddit varchar, subscribers int,"
-                         "submissions int, comment_rate real);")
+                         "submissions int, comment_rate real, mentions int);")
         self.conn.commit()
         print("Created data table.")
 
@@ -43,10 +43,10 @@ class DatabaseConnection(object):
         """
         insert a data item into the table
         """
-        self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate)"
-                         "VALUES (%s, %s, %s, %s, %s, %s);",
+        self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate, mentions)"
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s);",
                          (data_dict["start_time"], data_dict["end_time"], data_dict["subreddit"],
-                          data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"]))
+                          data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
         self.conn.commit()
 
     def insert_list(self, d_list):
@@ -54,10 +54,10 @@ class DatabaseConnection(object):
         insert a list of data items into the table
         """
         for data_dict in d_list:
-            self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate)"
-                             "VALUES (%s, %s, %s, %s, %s, %s);",
+            self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate, mentions)"
+                             "VALUES (%s, %s, %s, %s, %s, %s, %s);",
                              (data_dict["start_time"], data_dict["end_time"], data_dict["subreddit"],
-                              data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"]))
+                              data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
         self.conn.commit()
 
     def get_all_rows(self):
@@ -86,7 +86,7 @@ class DatabaseConnection(object):
     def get_rows_for_subreddit(self, subreddit, start=None, end=None):
         if start is None: start = datetime.datetime.fromtimestamp(0)
         if end is None: end = datetime.datetime.now()
-        querystr = "SELECT start_time, end_time, subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
+        querystr = "SELECT start_time, end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
             AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
         self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
@@ -107,14 +107,14 @@ class DatabaseConnection(object):
             If neither is given returns the metrics for the last two rows in the table.
         """
         if start is None and end is None:
-            querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
+            querystr = "SELECT subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
                     AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
                     ORDER BY end_time DESC LIMIT 2"
             self.cur.execute(querystr, (subreddit,))
         else:
             if start is None: start = datetime.datetime.fromtimestamp(0)
             if end is None: end = datetime.datetime.now()
-            querystr = "SELECT subscribers, submissions, comment_rate FROM data WHERE subreddit=%s \
+            querystr = "SELECT subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
                     AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
