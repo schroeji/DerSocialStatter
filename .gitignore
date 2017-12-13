@@ -1,5 +1,5 @@
 auth.json
 .tags
 __pycache__
-subreddits.csv
 settings.py
+log.log
