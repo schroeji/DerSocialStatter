@@ -1,11 +1,13 @@
 import os
 import argparse
 import datetime
-from settings import postgres as pg
 from settings import general
+import util
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
+
+log = util.setup_logger(__name__)
 
 def collect(coin_name_array):
     """
@@ -14,7 +16,8 @@ def collect(coin_name_array):
     and the last one is the subreddit
     """
     stat = RedditStats()
-    db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
+    auth = util.get_postgres_auth()
+    db = DatabaseConnection(**auth)
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
     general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets"]
@@ -24,7 +27,7 @@ def collect(coin_name_array):
         stats_dict = stat.compile_dict(subreddit, start)
         stats_dict["mentions"] = mentions[i]
         db.insert(stats_dict)
-        print("Got stats for:", subreddit)
+        log.info("Got stats for: %s" % (subreddit))
     db.close()
 
 def create_coin_name_array(num):
@@ -78,7 +81,8 @@ def main():
         write_subs_to_file(file_path, subs)
 
     if args.recreate_table:
-        db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
+        auth = util.get_postgres_auth()
+        db = DatabaseConnection(**auth)
         db.delete_table()
         db.create_table()
         db.close()
@@ -88,8 +92,8 @@ def main():
             subs = read_subs_from_file(file_path)
             collect(subs)
         else :
-            print("Collect called but {} does not exist.".format(file_path))
-            print("Run --find_subs first.")
+            log.info("Collect called but %s does not exist." % (file_path))
+            log.info("Run --find_subs first.")
 
 if __name__ == "__main__":
     main()
