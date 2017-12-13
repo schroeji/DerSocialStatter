@@ -1,17 +1,14 @@
 import praw
 import datetime
 import numpy as np
-import json
 import re
-from settings import reddit
+import util
+# add logging
 
 class RedditStats(object):
 
     def __init__(self):
-        with open(reddit["auth_file"]) as f:
-            auth = json.load(f)
-            f.close()
-
+        auth = util.get_reddit_auth()
         self.reddit = praw.Reddit(**auth)
 
         # start yesterday

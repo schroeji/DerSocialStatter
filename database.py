@@ -1,5 +1,8 @@
 import psycopg2
 import datetime
+from util import setup_logger
+
+log = setup_logger(__name__)
 
 class DatabaseConnection(object):
     """
@@ -14,7 +17,7 @@ class DatabaseConnection(object):
             if (not self.table_exists()):
                 self.create_table()
         except:
-            print("Could not connect to databse!")
+            log.error("Could not connect to databse!")
 
     def table_exists(self):
         self.cur.execute("SELECT * FROM information_schema.tables where table_name=%s ;", ("data",))
@@ -29,7 +32,7 @@ class DatabaseConnection(object):
                          "end_time timestamp, subreddit varchar, subscribers int,"
                          "submissions int, comment_rate real, mentions int);")
         self.conn.commit()
-        print("Created data table.")
+        log.info("Created data table.")
 
     def delete_table(self):
         """
@@ -37,7 +40,7 @@ class DatabaseConnection(object):
         """
         self.cur.execute("DROP TABLE data;")
         self.conn.commit()
-        print("Dropped data table.")
+        log.info("Dropped data table.")
 
     def insert(self, data_dict):
         """

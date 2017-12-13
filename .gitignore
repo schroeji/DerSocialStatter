@@ -2,3 +2,4 @@ auth.json
 .tags
 __pycache__
 settings.py
+log.log
