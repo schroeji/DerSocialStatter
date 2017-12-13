@@ -50,6 +50,8 @@ def growth_in_interval(db, subreddits, start, end):
     sorted_growths = sorted(mean_growths, key=lambda subr: subr[1])
     return sorted_growths
 
+
+
 def plot_growth(db, subreddit_list, start=None, end=None):
     if start is None:
         start = datetime.datetime.now() - datetime.timedelta(1)
@@ -76,7 +78,7 @@ def plot_growth(db, subreddit_list, start=None, end=None):
     plt.show()
 
 def main():
-        db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
+    db = DatabaseConnection(pg["database"], pg["user"], pg["password"], pg["hostname"])
     all_subreddits = db.get_all_subreddits()
     start =  datetime.datetime.now() - datetime.timedelta(hours=12)
     end =  datetime.datetime.now()- datetime.timedelta(hours=0)
@@ -85,6 +87,7 @@ def main():
     plot_growth(db, [s[0] for s in sorted_subs[-10:]], start, end)
     # recent_growth(db, ["ripple"])
     db.close()
+
 
 if __name__ == "__main__":
     main()
