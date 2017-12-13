@@ -64,7 +64,9 @@ class RedditStats(object):
         count_list = len(coin_name_array) * [0]
         regex_list = []
         for coin_name_tuple in coin_name_array:
-            pattern = "|".join(coin_name_tuple)
+            pattern = r"\b|\b".join(coin_name_tuple)
+            pattern = r"\b"+pattern+r"\b"
+            print(pattern)
             regex_list.append(re.compile(pattern, re.I|re.UNICODE))
         for sub in subreddit_list:
             comments = self.reddit.subreddit(sub).comments(limit=1024)

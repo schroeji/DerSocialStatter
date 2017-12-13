@@ -1,6 +1,7 @@
 import os
 import argparse
 import datetime
+import re
 from database import DatabaseConnection
 from reddit import RedditStats
 from coinmarketcap import CoinCap
@@ -12,7 +13,7 @@ def collect(coin_name_array):
     and the last one is the subreddit
     """
     stat = RedditStats()
-    db = DatabaseConnection("postgres", "postgres", "mongojean", "chumbala.duckdns.org")
+    db = DatabaseConnection("postgres", "postgres", "asdfgh", "localhost")
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
     general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets"]
@@ -91,7 +92,6 @@ def main():
             print("Collect called but {} does not exist.".format(file_name))
             print("Run --find_subs first.")
 
-
 if __name__ == "__main__":
-    # mentions()
     main()
+    # test()

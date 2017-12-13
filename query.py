@@ -21,8 +21,9 @@ def calc_mean_growth(metrics):
         if m1 == 0 and m2 == 0:
             growths.append(0)
         elif m2 == 0:
+            pass
             # TODO maybe there is a better way to handle this case
-            growths.append(m1)
+            # growths.append(m1)
         else:
             growths.append((m1-m2)/m2)
     return np.mean(growths)
