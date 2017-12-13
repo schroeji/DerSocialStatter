@@ -57,8 +57,7 @@ def read_subs_from_file(path):
     result = []
     for r in rows:
         result.append(r.split(","))
-    print(result)
-    return result
+    return result[:-1]
 
 def main():
     parser = argparse.ArgumentParser()
