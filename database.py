@@ -1,5 +1,6 @@
 import psycopg2
 import datetime
+import numpy as np
 from util import setup_logger
 
 log = setup_logger(__name__)
@@ -121,3 +122,26 @@ class DatabaseConnection(object):
                     AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
+
+    def get_interpolated_data(self, subreddit, timestamp):
+        """
+        Returns a metrics tuple for the subreddit for the given timestamp.
+        Created by linear intrpolation using the two nearest datapoints.
+        """
+        querystr = "SELECT end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+                AND end_time > %s ORDER BY end_time ASC LIMIT 1"
+        self.cur.execute(querystr, (subreddit, timestamp))
+        next_newer = self.cur.fetchone()
+        querystr = "SELECT end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+                AND end_time < %s ORDER BY end_time DESC LIMIT 1"
+        self.cur.execute(querystr, (subreddit, timestamp))
+        next_older = self.cur.fetchone()
+        if next_newer == None:  # if no newer data exists return the latest data
+            return next_older[1:]
+        elif next_older == None:  # if no older data exists raise error
+            raise ValueError("Cannot interpolate for given timestamp")
+        # weighted interpolation
+        interval = next_newer[0] - next_older[0]
+        weight_newer = (next_newer[0] - timestamp) / interval
+        weight_older = (timestamp - next_older[0]) / interval
+        return weight_newer*np.array(next_newer[1:]) + weight_older*np.array(next_older[1:])
