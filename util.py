@@ -39,7 +39,10 @@ def get_postgres_auth():
     return auth['postgres']
 
 def write_subs_to_file(path, subreddit_list):
-    string = "\n".join([",".join(s) for s in subreddit_list])
+    export_to_csv(path, subreddit_list)
+
+def export_to_csv(path, data_array):
+    string = "\n".join([",".join(str(s)) for s in data_array])
     f = open(path, "w")
     f.write(string)
     f.close()

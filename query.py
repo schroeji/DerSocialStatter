@@ -101,21 +101,29 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     submission_rate_growth = (sum(submission_rate) + total_hours) / (total_hours * (submission_rate[0] + 1))
     comment_rate_growth = (sum(metrics[:, 2]) + total_hours) / (total_hours * (comment_rate[0] + 1))
     mention_rate_growth = (sum(metrics[:, 3]) + total_hours) / (total_hours * (mention_rate[0] + 1))
-    return np.average([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth], weights=weights)
+    # return np.average([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth], weights=weights)
+    return [subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth]
 
 def main():
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
     all_subreddits = db.get_all_subreddits()
-    start =  datetime.datetime.now() - datetime.timedelta(hours=12)
-    end =  datetime.datetime.now()
-    # sorted_subs = growth_in_interval(db, all_subreddits, start, end)
+    all_subreddits.remove("ecoin")
+    start =  datetime.datetime.now() - datetime.timedelta(hours=37)
+    end =  datetime.datetime.now() - datetime.timedelta(hours=25)
+    time =  datetime.datetime.now() - datetime.timedelta(hours=1)
+    ap = db.get_all_subreddits_price()
+
+    sorted_subs = growth_in_interval(db, all_subreddits, start, end)
     # log.info(sorted_subs)
     # plot_growth(db, [s[0] for s in sorted_subs[-10:]], start, end, with_respect_to_begin=True)
     # print(sorted_subs[-10:])
-    growths = [(subreddit, averaged_interval_growth_rate(db, subreddit, start, end, weights=[0.15, 0.15, 0.4, 0.3])) for subreddit in all_subreddits ]
-    sorted_growths = sorted(growths, key=lambda subr: subr[1])
-    print(sorted_growths)
+    # growths = [(subreddit, averaged_interval_growth_rate(db, subreddit, start, end, weights=[0.15, 0.15, 0.4, 0.3])) for subreddit in all_subreddits ]
+    # growths = [averaged_interval_growth_rate(db, subreddit, start, end) for subreddit in all_subreddits ]
+    # prices = [db.get_interpolated_price_data(subreddit, time) for subreddit in all_subreddits]
+    # print(len(prices))
+    # print(len(growths))
+
     db.close()
 
 

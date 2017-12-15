@@ -8,4 +8,3 @@ general = dict(
     log_file = os.path.join(filedir, "log.log"),
     auth_file = os.path.join(filedir, "auth.json")
 )
-

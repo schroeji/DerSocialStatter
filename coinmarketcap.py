@@ -30,7 +30,7 @@ class CoinCap(object):
         """
         get the price data for all coin in coins
         """
-        json_url = "{}?limit={}".format(self.url, 300)
+        json_url = "{}?limit={}".format(self.url, 350)
         resp = requests.get(url=json_url)
         data = json.loads(resp.text)
         d = {}
