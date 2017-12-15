@@ -69,23 +69,26 @@ class DatabaseConnection(object):
         self.conn.commit()
 
 
-    def get_interpolated_price_data(self, coin, timestamp):
+    def get_interpolated_price_data(self, subreddit, timestamp):
         """
         Returns price, percent_change_1h, percent_change_24h
-        Created by linear intrpolation using the two nearest datapoints.
+        Created by linear interpolation using the two nearest datapoints.
         """
         querystr = "SELECT time, price, percent_change_1h, percent_change_24h FROM price WHERE subreddit=%s \
                 AND time > %s ORDER BY time ASC LIMIT 1"
-        self.cur.execute(querystr, (coin, timestamp))
+        self.cur.execute(querystr, (subreddit, timestamp))
         next_newer = self.cur.fetchone()
         querystr = "SELECT time, price, percent_change_1h, percent_change_24h FROM price WHERE subreddit=%s \
                 AND time < %s ORDER BY time DESC LIMIT 1"
-        self.cur.execute(querystr, (coin, timestamp))
+        self.cur.execute(querystr, (subreddit, timestamp))
         next_older = self.cur.fetchone()
-        if next_newer == None:  # if no newer data exists return the latest data
+        if next_newer == None and next_older == None:  # if no newer data exists return the latest data
+            log.warning("No match for %s" % (subreddit))
+            return
+        elif next_newer == None:
             return next_older[1:]
         elif next_older == None:  # if no older data exists raise error
-            raise ValueError("Cannot interpolate for given timestamp")
+            raise ValueError("Cannot interpolate for given timestamp subreddit: {}".format(subreddit))
         # weighted interpolation
         interval = next_newer[0] - next_older[0]
         weight_newer = (next_newer[0] - timestamp) / interval

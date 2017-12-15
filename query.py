@@ -9,7 +9,7 @@ import datetime
 import matplotlib
 import matplotlib.pyplot as plt
 import util
-
+from settings import general
 
 # TODO better error handling
 # TODO different timescales
@@ -99,28 +99,35 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     # cal the grwoth for the given rates
     subscriber_rate_growth =  (sum(subscriber_rate) + total_hours) / (total_hours * (subscriber_rate[0] + 1))
     submission_rate_growth = (sum(submission_rate) + total_hours) / (total_hours * (submission_rate[0] + 1))
-    comment_rate_growth = (sum(metrics[:, 2]) + total_hours) / (total_hours * (comment_rate[0] + 1))
-    mention_rate_growth = (sum(metrics[:, 3]) + total_hours) / (total_hours * (mention_rate[0] + 1))
+    comment_rate_growth = (sum(comment_rate) + total_hours) / (total_hours * (comment_rate[0] + 1))
+    mention_rate_growth = (sum(mention_rate) + total_hours) / (total_hours * (mention_rate[0] + 1))
     # return np.average([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth], weights=weights)
-    return [subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth]
+    return np.array([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth])
 
 def main():
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
-    all_subreddits = db.get_all_subreddits()
-    all_subreddits.remove("ecoin")
+    # all_subreddits = db.get_all_subreddits()
+    coin_name_array = util.read_subs_from_file(general["subreddit_file"])
     start =  datetime.datetime.now() - datetime.timedelta(hours=37)
     end =  datetime.datetime.now() - datetime.timedelta(hours=25)
     time =  datetime.datetime.now() - datetime.timedelta(hours=1)
-    ap = db.get_all_subreddits_price()
 
-    sorted_subs = growth_in_interval(db, all_subreddits, start, end)
+    # sorted_subs = growth_in_interval(db, all_subreddits, start, end)
     # log.info(sorted_subs)
     # plot_growth(db, [s[0] for s in sorted_subs[-10:]], start, end, with_respect_to_begin=True)
     # print(sorted_subs[-10:])
     # growths = [(subreddit, averaged_interval_growth_rate(db, subreddit, start, end, weights=[0.15, 0.15, 0.4, 0.3])) for subreddit in all_subreddits ]
-    # growths = [averaged_interval_growth_rate(db, subreddit, start, end) for subreddit in all_subreddits ]
-    # prices = [db.get_interpolated_price_data(subreddit, time) for subreddit in all_subreddits]
+    data = []
+    for coin in coin_name_array:
+        row = np.append(averaged_interval_growth_rate(db, coin[-1], start, end), db.get_interpolated_price_data(coin[-1], time)[2])
+        log.info("{} {}".format(coin[-1], row))
+        data.append(row)
+    data = np.array(data)
+    print(data)
+    util.export_to_csv("data.csv", data)
+
+
     # print(len(prices))
     # print(len(growths))
 

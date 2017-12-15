@@ -103,7 +103,7 @@ tierion,Tierion,TNT,tierion
 vericoin,VeriCoin,VRC,vericoin
 okcash,OKCash,okcash
 crown,Crown,CRW,crown
-bitcore,Bitcore,BTX,bitcore
+bitcore,Bitcore,BTX,bitcore_btx
 spankchain,SpankChain,SPANK,spankchain
 enjin-coin,Enjin Coin,ENJ,enjincoin
 salus,SaluS,SLS,salus
@@ -135,7 +135,6 @@ stox,Stox,STX,stox
 atbcoin,ATBCoin,ATB,atbcoin
 genesis-vision,Genesis Vision,GVT,genesisvision
 soarcoin,Soarcoin,SOAR,soarcoin
-databits,Databits,DTB,databits
 etherparty,Etherparty,FUEL,etherparty
 everex,Everex,EVX,everex
 neoscoin,NeosCoin,NEOS,neoscoin
