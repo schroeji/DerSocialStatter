@@ -37,3 +37,19 @@ def get_postgres_auth():
     with open(general["auth_file"]) as f:
         auth = json.load(f)
     return auth['postgres']
+
+def write_subs_to_file(path, subreddit_list):
+    string = "\n".join([",".join(s) for s in subreddit_list])
+    f = open(path, "w")
+    f.write(string)
+    f.close()
+
+def read_subs_from_file(path):
+    f = open(path, "r")
+    inp = f.read()
+    f.close()
+    rows = inp.split("\n")
+    result = []
+    for r in rows:
+        result.append(r.split(","))
+    return result[:-1]

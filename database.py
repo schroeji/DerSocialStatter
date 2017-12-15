@@ -15,16 +15,66 @@ class DatabaseConnection(object):
         try:
             self.conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)
             self.cur = self.conn.cursor()
-            if (not self.table_exists()):
-                self.create_table()
         except:
             log.error("Could not connect to databse!")
+            return
+        if (not self.data_table_exists()):
+            self.create_data_table()
+        if (not self.price_table_exists()):
+            self.create_price_table()
 
-    def table_exists(self):
+    def close(self):
+        """
+        close the database connection
+        """
+        self.conn.commit()
+        self.cur.close()
+        self.conn.close()
+
+    # ------------ price table ------------
+
+    def price_table_exists(self):
+        self.cur.execute("SELECT * FROM information_schema.tables where table_name=%s ;", ("price",))
+        return self.cur.rowcount > 0
+
+    def create_price_table(self):
+        """
+        create the price data table
+        format: |id|time|coin_id|coin_name|symbol|subreddit|price|percent_change_1h|percent_change_24h|
+        """
+        self.cur.execute("CREATE TABLE price (id serial PRIMARY KEY, time timestamp,"
+                         "coin_id varchar, coin_name varchar, symbol varchar, subreddit varchar,"
+                         "price real, percent_change_1h real, percent_change_24h real);")
+        self.conn.commit()
+        log.info("Created price table.")
+
+    def delete_price_table(self):
+        """
+        drop the data table
+        """
+        self.cur.execute("DROP TABLE data;")
+        self.conn.commit()
+        log.info("Dropped data table.")
+
+    def insert_price(self, price_data_dict):
+        """
+        insert a price item into the table
+        """
+        self.cur.execute("INSERT INTO price (time, coin_id, coin_name, symbol, subreddit, price, percent_change_1h,  percent_change_24h)"
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
+                         (price_data_dict["time"], price_data_dict["coin_id"], price_data_dict["coin_name"],
+                          price_data_dict["symbol"], price_data_dict["subreddit"], price_data_dict["price"],
+                          price_data_dict["percent_change_1h"], price_data_dict["percent_change_24h"])
+        )
+        self.conn.commit()
+
+    # ------------ data table ------------
+
+    def data_table_exists(self):
         self.cur.execute("SELECT * FROM information_schema.tables where table_name=%s ;", ("data",))
         return self.cur.rowcount > 0
 
-    def create_table(self):
+    def create_data_table(self):
         """
         create the main data table
         format: |id|start_time|end_time|subreddit|subscribers|submissions|comment_rate|mentions|
@@ -35,7 +85,7 @@ class DatabaseConnection(object):
         self.conn.commit()
         log.info("Created data table.")
 
-    def delete_table(self):
+    def delete_data_table(self):
         """
         drop the data table
         """
@@ -43,7 +93,7 @@ class DatabaseConnection(object):
         self.conn.commit()
         log.info("Dropped data table.")
 
-    def insert(self, data_dict):
+    def insert_data(self, data_dict):
         """
         insert a data item into the table
         """
@@ -53,31 +103,7 @@ class DatabaseConnection(object):
                           data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
         self.conn.commit()
 
-    def insert_list(self, d_list):
-        """
-        insert a list of data items into the table
-        """
-        for data_dict in d_list:
-            self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate, mentions)"
-                             "VALUES (%s, %s, %s, %s, %s, %s, %s);",
-                             (data_dict["start_time"], data_dict["end_time"], data_dict["subreddit"],
-                              data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
-        self.conn.commit()
-
-    def get_all_rows(self):
-        """
-        return a list of all rows in the data table
-        """
-        self.cur.execute("SELECT * FROM data;")
-        return self.cur.fetchall()
-
-    def close(self):
-        """
-        close the database connection
-        """
-        self.conn.commit()
-        self.cur.close()
-        self.conn.close()
+    # ------------ data table queries------------
 
     def get_all_subreddits(self):
         # TODO: method that returns only subreddits that have data in the last day
