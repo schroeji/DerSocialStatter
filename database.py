@@ -88,7 +88,7 @@ class DatabaseConnection(object):
         elif next_newer == None:
             return next_older[1:]
         elif next_older == None:  # if no older data exists raise error
-            raise ValueError("Cannot interpolate for given timestamp subreddit: {}".format(subreddit))
+            raise ValueError("Cannot interpolate for given timestamp, subreddit: {} {}".format(timestamp, subreddit))
         # weighted interpolation
         interval = next_newer[0] - next_older[0]
         weight_newer = (next_newer[0] - timestamp) / interval
@@ -196,7 +196,7 @@ class DatabaseConnection(object):
         elif next_newer is None:  # if no newer data exists return the latest data
             return next_older[1:]
         elif next_older is None:  # if no older data exists raise error
-            raise ValueError("Cannot interpolate for given timestamp")
+            raise ValueError("Cannot interpolate for given timestamp, subreddit: {} {}".format(timestamp, subreddit))
         # weighted interpolation
         interval = next_newer[0] - next_older[0]
         weight_newer = (next_newer[0] - timestamp) / interval

@@ -93,7 +93,7 @@ data = np.loadtxt("data.csv", delimiter=",")
 print("data.shape:", data.shape)
 # np.savetxt("tmp.txt", data)  # save data if you want to
 # split into features and labels
-X, y = data[:, :4], data[:, 4]
+X, y = data[:, :5], data[:, 5]
 print("X.shape:", X.shape)
 print("y.shape:", y.shape)
 
@@ -129,7 +129,7 @@ for j in h:
 plt.plot(h, squared_error_cv, label="mean CV error")
 plt.legend()
 plt.show()
-print(X)
+# print(X)
 print("Squared Error: ", squared_error_cv)
 print ("optimal lambda:", optimal_lambda)
 print ("best error:", opt_error)
@@ -147,6 +147,7 @@ for row in X:
     x = x.astype(float)
     x = quad_features([x]).flatten()
     x = np.insert(x, 0, 1.0)
+    print(x)
     pred = np.dot(beta_, x)
     preds.append([row[0], pred])
 sorted_preds= sorted(preds, key=lambda x: x[1])

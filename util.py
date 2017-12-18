@@ -45,6 +45,7 @@ def export_to_csv(path, data_array, append=False):
     string = "\n".join([",".join([str(e) for e in tup]) for tup in data_array])
     if append:
         f = open(path, "a")
+        f.write("\n")
     else:
         f = open(path, "w")
     f.write(string)

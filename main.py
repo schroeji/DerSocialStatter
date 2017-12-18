@@ -20,7 +20,7 @@ def collect(coin_name_array):
     db = DatabaseConnection(**auth)
     start = datetime.datetime.now() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
-    general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets"]
+    general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
     mentions = stat.get_mentions(coin_name_array, general_subs, start, True)
     log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
