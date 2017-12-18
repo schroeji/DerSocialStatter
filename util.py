@@ -41,13 +41,16 @@ def get_postgres_auth():
 def write_subs_to_file(path, subreddit_list):
     export_to_csv(path, subreddit_list)
 
-def export_to_csv(path, data_array):
+def export_to_csv(path, data_array, append=False):
     string = "\n".join([",".join([str(e) for e in tup]) for tup in data_array])
-    f = open(path, "w")
+    if append:
+        f = open(path, "a")
+    else:
+        f = open(path, "w")
     f.write(string)
     f.close()
 
-def read_subs_from_file(path):
+def read_csv(path):
     f = open(path, "r")
     inp = f.read()
     f.close()
@@ -56,3 +59,7 @@ def read_subs_from_file(path):
     for r in rows:
         result.append(r.split(","))
     return result[:-1]
+
+
+def read_subs_from_file(path):
+    return read_csv(path)

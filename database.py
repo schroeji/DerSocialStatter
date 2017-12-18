@@ -189,9 +189,13 @@ class DatabaseConnection(object):
                 AND end_time < %s ORDER BY end_time DESC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_older = self.cur.fetchone()
-        if next_newer == None:  # if no newer data exists return the latest data
+
+        if next_newer is None and next_older is None:  # if no newer data exists return the latest data
+            log.warning("No match for %s" % (subreddit))
+            return []
+        elif next_newer is None:  # if no newer data exists return the latest data
             return next_older[1:]
-        elif next_older == None:  # if no older data exists raise error
+        elif next_older is None:  # if no older data exists raise error
             raise ValueError("Cannot interpolate for given timestamp")
         # weighted interpolation
         interval = next_newer[0] - next_older[0]

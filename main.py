@@ -22,6 +22,7 @@ def collect(coin_name_array):
     start = start.strftime("%s")
     general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets"]
     mentions = stat.get_mentions(coin_name_array, general_subs, start, True)
+    log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
         subreddit = coin_tuple[-1]
         stats_dict = stat.compile_dict(subreddit, start)

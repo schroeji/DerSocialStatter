@@ -88,7 +88,7 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     Calculates the average growth_rate for the for metrics relative to their baseline.
     """
     hour = datetime.timedelta(hours=1)
-    total_hours = (end - start).seconds / 3600.
+    total_hours = (end - start).seconds / 3600. + (end-start).days * 24
     time_list = [start + hour*x for x in range(int(total_hours) + 1)]
     metrics = np.array([db.get_interpolated_data(subreddit, timestamp) for timestamp in time_list])
     # calc subscriber rate from data
@@ -104,33 +104,47 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     # return np.average([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth], weights=weights)
     return np.array([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth])
 
+def sub_and_price_growths(db, coin_name_array, end):
+    """
+    Collects the average interval growths and outputs them together with
+    the percentage gain of the coin in the next 24h AFTER end.
+    """
+    start = end - datetime.timedelta(hours=24)
+    growth_time = end + datetime.timedelta(hours=24)
+    data = []
+    for coin in coin_name_array:
+        row = np.append(averaged_interval_growth_rate(db, coin[-1], start, end), db.get_interpolated_price_data(coin[-1], growth_time)[2])
+        log.info("{} {}".format(coin[-1], row))
+        data.append(row)
+    data = np.array(data)
+    return data
+
+def prep_training_data(db, coin_name_array, timestep, steps):
+    hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
+    end_list = [hour_ago - timestep*i for i in range(steps)]
+    for end in end_list:
+        data = sub_and_price_growths(db, coin_name_array, end)
+        util.export_to_csv("data.csv", data, append=True)
+
+def prep_prediction_data(db, coin_name_array):
+    growths = []
+    for c in coin_name_array:
+        g = list(averaged_interval_growth_rate(db, c[-1],datetime.datetime.now() - datetime.timedelta(hours=24), datetime.datetime.now()))
+        g.insert(0, c[-1])
+        growths.append(g)
+        log.info(g)
+    util.export_to_csv("pred.csv", growths, append=False)
+
 def main():
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     coin_name_array = util.read_subs_from_file(general["subreddit_file"])
-    start =  datetime.datetime.now() - datetime.timedelta(hours=37)
-    end =  datetime.datetime.now() - datetime.timedelta(hours=25)
-    time =  datetime.datetime.now() - datetime.timedelta(hours=1)
-
-    # sorted_subs = growth_in_interval(db, all_subreddits, start, end)
-    # log.info(sorted_subs)
-    # plot_growth(db, [s[0] for s in sorted_subs[-10:]], start, end, with_respect_to_begin=True)
-    # print(sorted_subs[-10:])
-    # growths = [(subreddit, averaged_interval_growth_rate(db, subreddit, start, end, weights=[0.15, 0.15, 0.4, 0.3])) for subreddit in all_subreddits ]
-    data = []
-    for coin in coin_name_array:
-        row = np.append(averaged_interval_growth_rate(db, coin[-1], start, end), db.get_interpolated_price_data(coin[-1], time)[2])
-        log.info("{} {}".format(coin[-1], row))
-        data.append(row)
-    data = np.array(data)
-    print(data)
-    util.export_to_csv("data.csv", data)
-
-
-    # print(len(prices))
-    # print(len(growths))
-
+    for c in coin_name_array:
+        if c[0] == "bitcore":
+            coin_name_array.remove(c)
+    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 4)
+    prep_prediction_data(db, coin_name_array)
     db.close()
 
 
