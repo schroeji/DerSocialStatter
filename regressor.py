@@ -98,7 +98,7 @@ print("X.shape:", X.shape)
 print("y.shape:", y.shape)
 
 # b)
-X = quad_features(X)
+# X = quad_features(X)
 X = prepend_one(X)
 dim = X.shape[1]
 
@@ -145,7 +145,7 @@ for row in X:
     x = row[1:]
     x = np.array(x)
     x = x.astype(float)
-    x = quad_features([x]).flatten()
+    # x = quad_features([x]).flatten()
     x = np.insert(x, 0, 1.0)
     print(x)
     pred = np.dot(beta_, x)

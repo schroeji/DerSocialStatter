@@ -38,11 +38,13 @@ class RedditStats(object):
     def get_num_comments_per_hour(self, subreddit, start=None):
         if start is None:
             start = self.default_start
+        utc_start = datetime.datetime.utcfromtimestamp(int(start))
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
         cnt = 0
         for c in comm:
             cnt += 1
-            if int(c.created) < int(start):
+            utc_created = datetime.datetime.utcfromtimestamp(c.created_utc)
+            if utc_created < utc_start:
                 break
         if cnt <= 1:
             return 0.
