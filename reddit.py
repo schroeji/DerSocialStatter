@@ -42,11 +42,10 @@ class RedditStats(object):
         cnt = 0
         for c in comm:
             cnt += 1
-            if c.created_utc < start:
+            if c.created_utc < int(start):
                 break
         if cnt <= 1:
             return 0.
-        # comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
         comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end) - int(start))
         return comments_per_sec_in_on_day*3600
 
