@@ -12,10 +12,10 @@ class RedditStats(object):
         self.reddit = praw.Reddit(**auth)
 
         # start yesterday
-        self.default_start = datetime.datetime.now() - datetime.timedelta(1)
+        self.default_start = datetime.datetime.utcnow() - datetime.timedelta(1)
         self.default_start = self.default_start.strftime('%s')
         # end now
-        self.default_end = datetime.datetime.now()
+        self.default_end = datetime.datetime.utcnow()
         self.default_end = self.default_end.strftime('%s')
 
     def get_num_submissions(self,
@@ -38,17 +38,14 @@ class RedditStats(object):
     def get_num_comments_per_hour(self, subreddit, start=None):
         if start is None:
             start = self.default_start
-        utc_start = datetime.datetime.utcfromtimestamp(int(start))
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
         cnt = 0
         for c in comm:
             cnt += 1
-            utc_created = datetime.datetime.utcfromtimestamp(c.created_utc)
-            if utc_created < utc_start:
+            if c.created_utc < int(start):
                 break
         if cnt <= 1:
             return 0.
-        # comments_per_sec_in_on_day = cnt/np.abs((int(first_timestamp) - int(current_timestamp)))
         comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end) - int(start))
         return comments_per_sec_in_on_day*3600
 

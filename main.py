@@ -18,7 +18,7 @@ def collect(coin_name_array):
     stat = RedditStats()
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
-    start = datetime.datetime.now() - datetime.timedelta(hours=1)
+    start = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
     start = start.strftime("%s")
     general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
     mentions = stat.get_mentions(coin_name_array, general_subs, start, True)
@@ -39,7 +39,7 @@ def collect_price(coin_name_array):
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
     cap = CoinCap()
-    time = datetime.datetime.now()
+    time = datetime.datetime.utcnow()
     # time = time.strftime("%s")
     price_data = cap.get_coin_price_data([c[0] for c in coin_name_array])
     for k, d in price_data.items():
