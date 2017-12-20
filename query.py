@@ -95,6 +95,10 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     submission_rate = metrics[:, 1]
     comment_rate = metrics[:, 2]
     mention_rate = metrics[:, 3]
+    subscriber_rate[0] = max(subscriber_rate[0], 0)
+    submission_rate[0] = max(subscriber_rate[0], 0)
+    comment_rate[0] = max(subscriber_rate[0], 0)
+    mention_rate[0] = max(subscriber_rate[0], 0)
     # cal the grwoth for the given rates
     subscriber_rate_growth =  (sum(subscriber_rate) + total_hours) / (total_hours * (subscriber_rate[0] + 1))
     submission_rate_growth = (sum(submission_rate) + total_hours) / (total_hours * (submission_rate[0] + 1))
@@ -133,10 +137,14 @@ def prep_training_data(db, coin_name_array, timestep, steps):
 def prep_prediction_data(db, coin_name_array):
     growths = sub_and_price_growths(db, coin_name_array, datetime.datetime.utcnow(), include_future_growth=False)
     preds = []
+    means = []
     for i,c in enumerate(growths):
         l = list(c)
         l.insert(0, coin_name_array[i][0])
         preds.append(l)
+        means.append([coin_name_array[i][0], np.mean(c[:-1])])
+    sorted_means= sorted(means, key=lambda subr: subr[1])
+    print(sorted_means)
     util.export_to_csv("pred.csv", preds, append=False)
 
 def main():
@@ -144,8 +152,8 @@ def main():
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     coin_name_array = util.read_subs_from_file(general["subreddit_file"])
-    coin_name_array = coin_name_array[10:] # skip recently added
-    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 1)
+    coin_name_array = coin_name_array[3:] # skip recently added
+    # prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 1)
     prep_prediction_data(db, coin_name_array)
     db.close()
 

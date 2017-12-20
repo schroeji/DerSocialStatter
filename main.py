@@ -47,8 +47,8 @@ def collect_price(coin_name_array):
         for coin in coin_name_array:
             if k in coin:
                 d["subreddit"] = coin[-1]
-        db.insert_price(d)
         log.info("Got price for: %s" % (d["subreddit"]))
+        db.insert_price(d)
     db.close()
 
 def create_coin_name_array(num):
