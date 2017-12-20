@@ -54,9 +54,9 @@ def growth_in_interval(db, subreddits, start, end):
 
 def plot_growth(db, subreddit_list, start=None, end=None, with_respect_to_begin=False):
     if start is None:
-        start = datetime.datetime.now() - datetime.timedelta(1)
+        start = datetime.datetime.utcnow() - datetime.timedelta(1)
     if end is None:
-        end = datetime.datetime.now()
+        end = datetime.datetime.utcnow()
     assert start < end
     log.info(subreddit_list)
     for subr in subreddit_list:
@@ -125,14 +125,14 @@ def sub_and_price_growths(db, coin_name_array, end, include_future_growth=True):
     return data
 
 def prep_training_data(db, coin_name_array, timestep, steps):
-    hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
+    hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
     end_list = [hour_ago - timestep*i for i in range(steps)]
     for end in end_list:
         data = sub_and_price_growths(db, coin_name_array, end, include_future_growth=True)
         util.export_to_csv("data.csv", data, append=True)
 
 def prep_prediction_data(db, coin_name_array):
-    growths = sub_and_price_growths(db, coin_name_array, datetime.datetime.now(), include_future_growth=False)
+    growths = sub_and_price_growths(db, coin_name_array, datetime.datetime.utcnow(), include_future_growth=False)
     preds = []
     for i,c in enumerate(growths):
         l = list(c)

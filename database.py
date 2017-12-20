@@ -142,7 +142,7 @@ class DatabaseConnection(object):
 
     def get_rows_for_subreddit(self, subreddit, start=None, end=None):
         if start is None: start = datetime.datetime.fromtimestamp(0)
-        if end is None: end = datetime.datetime.now()
+        if end is None: end = datetime.datetime.utcnow()
         querystr = "SELECT start_time, end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
             AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
         self.cur.execute(querystr, (subreddit, end, start))
@@ -170,7 +170,7 @@ class DatabaseConnection(object):
             self.cur.execute(querystr, (subreddit,))
         else:
             if start is None: start = datetime.datetime.fromtimestamp(0)
-            if end is None: end = datetime.datetime.now()
+            if end is None: end = datetime.datetime.utcnow()
             querystr = "SELECT subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
                     AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
