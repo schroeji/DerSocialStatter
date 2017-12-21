@@ -8,8 +8,9 @@ from reddit import RedditStats
 from coinmarketcap import CoinCap
 
 log = util.setup_logger(__name__)
+GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
 
-def collect(coin_name_array):
+def collect(coin_name_array, hours=12):
     """
     Collects the reddit data for the coins in coin_name_array.
     coin_name_array should be a 2D array where each row contains keywords for a crypto coin
@@ -18,14 +19,11 @@ def collect(coin_name_array):
     stat = RedditStats()
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
-    start = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    start = start.strftime("%s")
-    general_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
-    mentions = stat.get_mentions(coin_name_array, general_subs, start, True)
+    mentions = stat.get_mentions(coin_name_array, GENERAL_SUBS, hours=hours, include_submissions=True)
     log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
         subreddit = coin_tuple[-1]
-        stats_dict = stat.compile_dict(subreddit, start)
+        stats_dict = stat.compile_dict(subreddit, hours=hours)
         stats_dict["mentions"] = mentions[i]
         db.insert_data(stats_dict)
         log.info("Got stats for: %s" % (subreddit))

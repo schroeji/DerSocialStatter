@@ -7,55 +7,60 @@ import util
 
 class RedditStats(object):
 
-    def __init__(self):
+    def __init__(self, hours=12):
         auth = util.get_reddit_auth()
         self.reddit = praw.Reddit(**auth)
 
         # start yesterday
-        self.default_start = datetime.datetime.utcnow() - datetime.timedelta(1)
-        self.default_start = self.default_start.strftime('%s')
+        self.hours = hours
+        self.default_start = datetime.datetime.utcnow() - datetime.timedelta(hours=hours)
         # end now
         self.default_end = datetime.datetime.utcnow()
-        self.default_end = self.default_end.strftime('%s')
 
     def get_num_submissions(self,
                             subreddit,
-                            start=None,
+                            hours=None,
                             end=None):
 
         '''
         Get number of submissions to subreddit in time range.
         '''
-        if start is None:
+        if hours is None:
             start = self.default_start
+        else:
+            start = self.default_end - datetime.timedelta(hours=hours)
         if end is None:
             end = self.default_end
-        return len([s for s in self.reddit.subreddit(subreddit).submissions(start, end)])
+        return len([s for s in self.reddit.subreddit(subreddit).submissions(start.timestamp(), end.timestamp())])
 
     def get_num_subscribers(self, subreddit):
         return (self.reddit.subreddit(subreddit).subscribers)
 
-    def get_num_comments_per_hour(self, subreddit, start=None):
-        if start is None:
+    def get_num_comments_per_hour(self, subreddit, hours=None):
+        if hours is None:
             start = self.default_start
+        else:
+            start = self.default_end - datetime.timedelta(hours=hours)
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
         cnt = 0
         for c in comm:
             cnt += 1
-            if c.created_utc < int(start):
+            if c.created_utc < int(start.timestamp()):
                 break
         if cnt <= 1:
             return 0.
-        comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end) - int(start))
+        comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end.timestamp()) - int(start.timestamp()))
         return comments_per_sec_in_on_day*3600
 
-    def get_mentions(self, coin_name_array, subreddit_list, start=None, include_submissions=False):
+    def get_mentions(self, coin_name_array, subreddit_list, hours=None, include_submissions=False):
         """
         counts how often words from coin_name_tuple were mentioned in subreddits from subreddit list
         since start
         """
-        if start is None:
+        if hours is None:
             start = self.default_start
+        else:
+            start = self.default_end - datetime.timedelta(hours=hours)
         count_list = len(coin_name_array) * [0]
         regex_list = []
         for coin_name_tuple in coin_name_array:
@@ -65,30 +70,30 @@ class RedditStats(object):
         for sub in subreddit_list:
             comments = self.reddit.subreddit(sub).comments(limit=1024)
             for comm in comments:
-                if int(comm.created) < int(start):
+                if int(comm.created) < int(start.timestamp()):
                     break
                 for i, regex in enumerate(regex_list):
                     if not re.search(regex, comm.body) is None:
                         count_list[i] += 1
             if include_submissions:
                 for submission in self.reddit.subreddit(sub).new():
-                    if (int(submission.created) < int(start)):
+                    if (int(submission.created) < int(start.timestamp())):
                         break
                     for i, regex in enumerate(regex_list):
                         if not re.search(regex, submission.title) is None:
                             count_list[i] += 1
         return count_list
 
-    def compile_dict(self, subreddit, start=None):
-        if start is None:
-            start = self.default_start
+    def compile_dict(self, subreddit, hours=None):
+        if hours is None:
+            hours = self.hours
         d = {}
-        d["start_time"] = datetime.datetime.fromtimestamp(int(start))
-        d["end_time"] = datetime.datetime.fromtimestamp(int(self.default_end))
+        d["time"] = datetime.datetime.fromtimestamp(int(self.default_end.timestamp()))
+        d["hours"] = hours
         d["subreddit"] = subreddit
         d["subscribers"] = self.get_num_subscribers(subreddit)
-        d["submissions"] = self.get_num_submissions(subreddit, start=start)
-        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, start=start)
+        d["submissions"] = self.get_num_submissions(subreddit, hours=hours)
+        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, hours=hours)
         return d
 
     def find_subreddits(self, coin_name_list):

@@ -104,10 +104,10 @@ class DatabaseConnection(object):
     def create_data_table(self):
         """
         create the main data table
-        format: |id|start_time|end_time|subreddit|subscribers|submissions|comment_rate|mentions|
+        format: |id|time|hours|subreddit|subscribers|submissions|comment_rate|mentions|
         """
-        self.cur.execute("CREATE TABLE data (id serial PRIMARY KEY, start_time timestamp,"
-                         "end_time timestamp, subreddit varchar, subscribers int,"
+        self.cur.execute("CREATE TABLE data (id serial PRIMARY KEY, time timestamp,"
+                         "hours int, subreddit varchar, subscribers int,"
                          "submissions int, comment_rate real, mentions int);")
         self.conn.commit()
         log.info("Created data table.")
@@ -124,9 +124,9 @@ class DatabaseConnection(object):
         """
         insert a data item into the table
         """
-        self.cur.execute("INSERT INTO data (start_time, end_time, subreddit, subscribers, submissions, comment_rate, mentions)"
+        self.cur.execute("INSERT INTO data (time, hours, subreddit, subscribers, submissions, comment_rate, mentions)"
                          "VALUES (%s, %s, %s, %s, %s, %s, %s);",
-                         (data_dict["start_time"], data_dict["end_time"], data_dict["subreddit"],
+                         (data_dict["time"], data_dict["hours"], data_dict["subreddit"],
                           data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
         self.conn.commit()
 
