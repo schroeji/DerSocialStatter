@@ -42,9 +42,9 @@ class DatabaseConnection(object):
         create the price data table
         format: |id|time|coin_id|coin_name|symbol|subreddit|price|percent_change_1h|percent_change_24h|
         """
-        self.cur.execute("CREATE TABLE price (id serial PRIMARY KEY, time timestamp,"
-                         "coin_id varchar, coin_name varchar, symbol varchar, subreddit varchar,"
-                         "price real, percent_change_1h real, percent_change_24h real);")
+        self.cur.execute("CREATE TABLE price (id serial PRIMARY KEY, time timestamp, \
+                         coin_id varchar, coin_name varchar, symbol varchar, subreddit varchar, \
+                         price real, percent_change_1h real, percent_change_24h real);")
         self.conn.commit()
         log.info("Created price table.")
 
@@ -104,11 +104,12 @@ class DatabaseConnection(object):
     def create_data_table(self):
         """
         create the main data table
-        format: |id|time|hours|subreddit|subscribers|submissions|comment_rate|mentions|
+        format: |id|time|hours|subreddit|subscribers|submission_rate|comment_rate|mention_rate|submission_rate_1h|comment_rate_1h|mention_rate_1h|
         """
         self.cur.execute("CREATE TABLE data (id serial PRIMARY KEY, time timestamp,"
                          "hours int, subreddit varchar, subscribers int,"
-                         "submissions int, comment_rate real, mentions int);")
+                         "submission_rate real, comment_rate real, mention_rate real,"
+                         "submission_rate_1h real, comment_rate_1h real, mention_rate_1h real);")
         self.conn.commit()
         log.info("Created data table.")
 
@@ -124,10 +125,11 @@ class DatabaseConnection(object):
         """
         insert a data item into the table
         """
-        self.cur.execute("INSERT INTO data (time, hours, subreddit, subscribers, submissions, comment_rate, mentions)"
-                         "VALUES (%s, %s, %s, %s, %s, %s, %s);",
+        self.cur.execute("INSERT INTO data (time, hours, subreddit, subscribers, submission_rate, comment_rate, mention_rate, submission_rate_1h, comment_rate_1h, mention_rate_1h)"
+                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
                          (data_dict["time"], data_dict["hours"], data_dict["subreddit"],
-                          data_dict["subscribers"], data_dict["submissions"], data_dict["comment_rate"], data_dict["mentions"]))
+                          data_dict["subscribers"], data_dict["submission_rate"], data_dict["comment_rate"], data_dict["mention_rate"],
+                          data_dict["submission_rate_1h"], data_dict["comment_rate_1h"], data_dict["mention_rate_1h"]))
         self.conn.commit()
 
     # ------------ data table queries------------
@@ -143,7 +145,8 @@ class DatabaseConnection(object):
     def get_rows_for_subreddit(self, subreddit, start=None, end=None):
         if start is None: start = datetime.datetime.fromtimestamp(0)
         if end is None: end = datetime.datetime.utcnow()
-        querystr = "SELECT start_time, end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+        querystr = "SELECT start_time, end_time, subscribers, submission_rate, comment_rate, mention_rate, \
+            subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
             AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
         self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
@@ -151,7 +154,7 @@ class DatabaseConnection(object):
     def get_metrics_for_subreddit(self, subreddit, start=None, end=None):
         # TODO custom timeinterval, minimum time distance
         """
-        gets all tuples of subscribers, submissions and comment_rate in the given time interval
+        gets all tuples of subscribers, submission_rate and comment_rate in the given time interval
 
         Args:
             subreddit: string
@@ -164,14 +167,16 @@ class DatabaseConnection(object):
             If neither is given returns the metrics for the last two rows in the table.
         """
         if start is None and end is None:
-            querystr = "SELECT subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+            querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
+                    subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                     AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
                     ORDER BY end_time DESC LIMIT 2"
             self.cur.execute(querystr, (subreddit,))
         else:
             if start is None: start = datetime.datetime.fromtimestamp(0)
             if end is None: end = datetime.datetime.utcnow()
-            querystr = "SELECT subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+            querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
+                    subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                     AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
@@ -181,11 +186,13 @@ class DatabaseConnection(object):
         Returns a metrics tuple for the subreddit for the given timestamp.
         Created by linear intrpolation using the two nearest datapoints.
         """
-        querystr = "SELECT time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+        querystr = "SELECT time, subscribers, submission_rate, comment_rate, mention_rate, \
+                subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                 AND time > %s ORDER BY time ASC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_newer = self.cur.fetchone()
-        querystr = "SELECT time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+        querystr = "SELECT time, subscribers, submission_rate, comment_rate, mention_rate, \
+                subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                 AND time < %s ORDER BY time DESC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_older = self.cur.fetchone()
