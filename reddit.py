@@ -4,6 +4,7 @@ import numpy as np
 import re
 import util
 # add logging
+HOUR_IN_SECONDS = 3600
 
 class RedditStats(object):
 
@@ -17,13 +18,16 @@ class RedditStats(object):
         # end now
         self.default_end = datetime.datetime.utcnow()
 
-    def get_num_submissions(self,
-                            subreddit,
-                            hours=None,
-                            end=None):
+    def get_num_submissions_per_hour(self,
+                                     subreddit,
+                                     hours=None,
+                                     end=None):
 
         '''
         Get number of submissions to subreddit in time range.
+
+        Returns:
+            Tuple: (Number of submissions per hour averaged over hours, Num Submissions in Last Hour)
         '''
         if hours is None:
             start = self.default_start
@@ -31,7 +35,13 @@ class RedditStats(object):
             start = self.default_end - datetime.timedelta(hours=hours)
         if end is None:
             end = self.default_end
-        return len([s for s in self.reddit.subreddit(subreddit).submissions(start.timestamp(), end.timestamp())])
+        start_one = end - datetime.timedelta(hours=1)
+
+        submissions_x_h = [s for s in self.reddit.subreddit(subreddit).submissions(start.timestamp(), end.timestamp())]
+        num_submission_x_h = len(submissions_x_h)
+        num_submission_one_h = len([s for s in submissions_x_h if s.created_utc > start_one.timestamp()])
+        num_per_h_in_x_h = float(num_submission_x_h)/np.abs(int(end.timestamp()) - int(start.timestamp()))*HOUR_IN_SECONDS
+        return (num_per_h_in_x_h, num_submission_one_h)
 
     def get_num_subscribers(self, subreddit):
         return (self.reddit.subreddit(subreddit).subscribers)
@@ -41,16 +51,26 @@ class RedditStats(object):
             start = self.default_start
         else:
             start = self.default_end - datetime.timedelta(hours=hours)
+        start_one = self.default_end - datetime.timedelta(hours=1)
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
-        cnt = 0
+        cntagg = 0
+        cntone = 0
         for c in comm:
-            cnt += 1
+            cntagg += 1
+            if c.created_utc > int(start_one.timestamp()):
+                cntone += 1
             if c.created_utc < int(start.timestamp()):
                 break
-        if cnt <= 1:
-            return 0.
-        comments_per_sec_in_on_day = float(cnt)/np.abs(int(self.default_end.timestamp()) - int(start.timestamp()))
-        return comments_per_sec_in_on_day*3600
+
+        if cntagg <= 1:
+            comments_per_sec_in_x_h = 0.
+        else:
+            comments_per_sec_in_x_h = float(cntagg)/np.abs(int(self.default_end.timestamp()) - int(start.timestamp()))
+        if cntone <= 1:
+            comments_per_sec_in_1_h = 0.
+        else:
+            comments_per_sec_in_1_h = float(cntone)/np.abs(int(self.default_end.timestamp()) - int(start_one.timestamp()))
+        return (comments_per_sec_in_x_h*HOUR_IN_SECONDS, comments_per_sec_in_1_h*HOUR_IN_SECONDS)
 
     def get_mentions(self, coin_name_array, subreddit_list, hours=None, include_submissions=False):
         """
@@ -92,8 +112,8 @@ class RedditStats(object):
         d["hours"] = hours
         d["subreddit"] = subreddit
         d["subscribers"] = self.get_num_subscribers(subreddit)
-        d["submissions"] = self.get_num_submissions(subreddit, hours=hours)
-        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, hours=hours)
+        d["submissions"] = self.get_num_submissions_per_hour(subreddit, hours=hours)[0]
+        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, hours=hours)[0]
         return d
 
     def find_subreddits(self, coin_name_list):
