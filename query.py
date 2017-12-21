@@ -129,7 +129,7 @@ def sub_and_price_growths(db, coin_name_array, end, include_future_growth=True):
 
 def prep_training_data(db, coin_name_array, timestep, steps):
     hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    end_list = [hour_ago - timestep*i for i in range(steps)]
+    end_list = [hour_ago - timestep*i for i in range(1, steps+1)]
     for end in end_list:
         data = sub_and_price_growths(db, coin_name_array, end, include_future_growth=True)
         util.export_to_csv("data.csv", data, append=True)
@@ -152,11 +152,10 @@ def main():
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     coin_name_array = util.read_subs_from_file(general["subreddit_file"])
-    coin_name_array = coin_name_array[3:] # skip recently added
-    # prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 1)
+    coin_name_array = coin_name_array[10:] # skip recently added
+    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 1)
     prep_prediction_data(db, coin_name_array)
     db.close()
-
 
 if __name__ == "__main__":
     main()
