@@ -181,12 +181,12 @@ class DatabaseConnection(object):
         Returns a metrics tuple for the subreddit for the given timestamp.
         Created by linear intrpolation using the two nearest datapoints.
         """
-        querystr = "SELECT end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
-                AND end_time > %s ORDER BY end_time ASC LIMIT 1"
+        querystr = "SELECT time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+                AND time > %s ORDER BY time ASC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_newer = self.cur.fetchone()
-        querystr = "SELECT end_time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
-                AND end_time < %s ORDER BY end_time DESC LIMIT 1"
+        querystr = "SELECT time, subscribers, submissions, comment_rate, mentions FROM data WHERE subreddit=%s \
+                AND time < %s ORDER BY time DESC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_older = self.cur.fetchone()
 
@@ -197,8 +197,18 @@ class DatabaseConnection(object):
             return next_older[1:]
         elif next_older is None:  # if no older data exists raise error
             raise ValueError("Cannot interpolate for given timestamp, subreddit: {} {}".format(timestamp, subreddit))
+        if next_newer[0] - next_older[0] > datetime.timedelta(hours=3):
+            log.warning("Difference of timestamps while interpolating %s is %s" % (subreddit, next_newer[0] - next_older[0]))
         # weighted interpolation
         interval = next_newer[0] - next_older[0]
         weight_newer = (next_newer[0] - timestamp) / interval
         weight_older = (timestamp - next_older[0]) / interval
         return weight_newer*np.array(next_newer[1:]) + weight_older*np.array(next_older[1:])
+
+    def get_subreddits_with_data(self, timestamp):
+        """
+        Gets all subreddits that have datapoints before a given datapoint
+        """
+        querystr = "SELECT DISTINCT subreddit FROM data WHERE time < %s"
+        self.cur.execute(querystr, (timestamp,))
+        return [i[0] for i in self.cur.fetchall()]
