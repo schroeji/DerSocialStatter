@@ -2,6 +2,7 @@ import argparse
 import datetime
 import os
 
+import simulator
 import util
 from coinmarketcap import CoinCap
 from database import DatabaseConnection
@@ -80,6 +81,8 @@ def main():
                         help="Collect subreddit information into the database.")
     parser.add_argument("--collect_price", default=False, action='store_true',
                         help="Collect coin price information into the database.")
+    parser.add_argument("--run_sim", default=False, action='store_true',
+                        help="Run simulation.")
     args = parser.parse_args()
     # -----------------------------------
 
@@ -109,6 +112,9 @@ def main():
         else :
             log.info("Collect price called but %s does not exist." % (file_path))
             log.info("Run --find_subs first.")
+
+    if args.run_sim:
+        simulator.simulate()
 
 if __name__ == "__main__":
     main()

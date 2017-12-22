@@ -1,6 +1,8 @@
-import psycopg2
 import datetime
+
 import numpy as np
+import psycopg2
+
 from util import setup_logger
 
 log = setup_logger(__name__)
