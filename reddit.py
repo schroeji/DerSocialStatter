@@ -59,11 +59,6 @@ class RedditStats(object):
             if c.created_utc < int(start.timestamp()):
                 break
             last_created = c.created_utc
-        if(subreddit == "bitcoin"):
-            print(cntagg)
-            print(cntone)
-            print(last_created)
-            print(last_1_hour_created)
         if cntagg <= 1:
             comments_per_sec_in_x_h = 0.
         else:
@@ -122,14 +117,16 @@ class RedditStats(object):
         if hours is None:
             hours = self.hours
         d = {}
+        comment_rates =  self.get_num_comments_per_hour(subreddit, hours=hours)
+        submission_rates = self.get_num_submissions_per_hour(subreddit, hours=hours)
         d["time"] = datetime.datetime.fromtimestamp(int(self.default_end.timestamp()))
         d["hours"] = hours
         d["subreddit"] = subreddit
         d["subscribers"] = self.get_num_subscribers(subreddit)
-        d["submission_rate"] = self.get_num_submissions_per_hour(subreddit, hours=hours)[0]
-        d["comment_rate"] = self.get_num_comments_per_hour(subreddit, hours=hours)[0]
-        d["submission_rate_1h"] = self.get_num_submissions_per_hour(subreddit, hours=hours)[1]
-        d["comment_rate_1h"] = self.get_num_comments_per_hour(subreddit, hours=hours)[1]
+        d["submission_rate"] = submission_rates[0]
+        d["comment_rate"] = comment_rates[0]
+        d["submission_rate_1h"] = submission_rates[1]
+        d["comment_rate_1h"] = comment_rates[1]
         return d
 
     def find_subreddits(self, coin_name_list):
