@@ -1,11 +1,12 @@
-import os
 import argparse
 import datetime
-from settings import general
+import os
+
 import util
+from coinmarketcap import CoinCap
 from database import DatabaseConnection
 from reddit import RedditStats
-from coinmarketcap import CoinCap
+from settings import general
 
 log = util.setup_logger(__name__)
 GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
