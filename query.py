@@ -107,13 +107,13 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     # return np.average([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth], weights=weights)
     return np.array([subscriber_rate_growth, submission_rate_growth, comment_rate_growth, mention_rate_growth])
 
-def sub_and_price_growths(db, coin_name_array, end, include_future_growth=True):
+def sub_and_price_growths(db, coin_name_array, end, hours=24, include_future_growth=True):
     """
     Collects the average interval growths and outputs them together with
     the percentage gain of the coin in the next 24h AFTER end.
     """
-    start = end - datetime.timedelta(hours=24)
-    growth_time = end + datetime.timedelta(hours=24)
+    start = end - datetime.timedelta(hours=hours)
+    growth_time = end + datetime.timedelta(hours=hours)
     data = []
     for coin in coin_name_array:
         row = averaged_interval_growth_rate(db, coin[-1], start, end)
