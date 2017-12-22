@@ -85,13 +85,15 @@ class RedditStats(object):
             pattern = r"\b|\b".join(coin_name_tuple)
             pattern = r"\b"+pattern+r"\b"
             regex_list.append(re.compile(pattern, re.I|re.UNICODE))
+        comm_created = float('inf')
+        submission_created = float('inf')
         for sub in subreddit_list:
             comments = self.reddit.subreddit(sub).comments(limit=1024)
             # search in comments
             for comm in comments:
                 if int(comm.created_utc) < int(start.timestamp()):
                     break
-                comm_created = int(comm.created_utc)
+                comm_created = min(comm_created, comm.created_utc)
                 for i, regex in enumerate(regex_list):
                     if not re.search(regex, comm.body) is None:
                         count_list[i] += 1
@@ -102,7 +104,7 @@ class RedditStats(object):
                 for submission in self.reddit.subreddit(sub).new():
                     if int(submission.created_utc) < int(start.timestamp()):
                         break
-                    submission_created = int(submission.created_utc)
+                    submission_created = min(submission_created, submission.created_utc)
                     for i, regex in enumerate(regex_list):
                         if not re.search(regex, submission.title) is None:
                             count_list[i] += 1
