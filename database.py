@@ -146,7 +146,7 @@ class DatabaseConnection(object):
         if start is None: start = datetime.datetime.fromtimestamp(0)
         if end is None: end = datetime.datetime.utcnow()
         querystr = "SELECT start_time, end_time, subscribers, submission_rate, comment_rate, mention_rate, \
-            subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+            submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
             AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
         self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
@@ -168,7 +168,7 @@ class DatabaseConnection(object):
         """
         if start is None and end is None:
             querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
-                    subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+                    submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                     AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
                     ORDER BY end_time DESC LIMIT 2"
             self.cur.execute(querystr, (subreddit,))
@@ -176,7 +176,7 @@ class DatabaseConnection(object):
             if start is None: start = datetime.datetime.fromtimestamp(0)
             if end is None: end = datetime.datetime.utcnow()
             querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
-                    subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+                    submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                     AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
         return self.cur.fetchall()
@@ -187,12 +187,12 @@ class DatabaseConnection(object):
         Created by linear intrpolation using the two nearest datapoints.
         """
         querystr = "SELECT time, subscribers, submission_rate, comment_rate, mention_rate, \
-                subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+                submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                 AND time > %s ORDER BY time ASC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_newer = self.cur.fetchone()
         querystr = "SELECT time, subscribers, submission_rate, comment_rate, mention_rate, \
-                subscribers_1h, submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+                submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
                 AND time < %s ORDER BY time DESC LIMIT 1"
         self.cur.execute(querystr, (subreddit, timestamp))
         next_older = self.cur.fetchone()
