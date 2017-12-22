@@ -55,7 +55,6 @@ class RedditStats(object):
             cntagg += 1
             if c.created_utc > int(start_one.timestamp()):
                 cntone += 1
-                last_1_hour_created = c.created_utc
             if c.created_utc < int(start.timestamp()):
                 break
             last_created = c.created_utc
@@ -66,7 +65,7 @@ class RedditStats(object):
         if cntone <= 1:
             comments_per_sec_in_1_h = 0.
         else:
-            comments_per_sec_in_1_h = float(cntone)/np.abs(int(self.default_end.timestamp()) - int(last_1_hour_created))
+            comments_per_sec_in_1_h = float(cntone)
         return (comments_per_sec_in_x_h*HOUR_IN_SECONDS, comments_per_sec_in_1_h*HOUR_IN_SECONDS)
 
     def get_mentions(self, coin_name_array, subreddit_list, hours=None, include_submissions=False):

@@ -153,7 +153,7 @@ def main():
     # all_subreddits = db.get_all_subreddits()
     coin_name_array = util.read_subs_from_file(general["subreddit_file"])
     coin_name_array = coin_name_array[10:] # skip recently added
-    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 1)
+    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 2)
     prep_prediction_data(db, coin_name_array)
     db.close()
 
