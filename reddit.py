@@ -65,7 +65,7 @@ class RedditStats(object):
         if cntone <= 1:
             comments_per_sec_in_1_h = 0.
         else:
-            comments_per_sec_in_1_h = float(cntone)
+            comments_per_sec_in_1_h = float(cntone)/HOUR_IN_SECONDS
         return (comments_per_sec_in_x_h*HOUR_IN_SECONDS, comments_per_sec_in_1_h*HOUR_IN_SECONDS)
 
     def get_mentions(self, coin_name_array, subreddit_list, hours=None, include_submissions=False):
