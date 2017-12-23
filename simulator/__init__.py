@@ -9,13 +9,12 @@ log = util.setup_logger(__name__)
 
 class Simulator(object):
     def __init__(self, trader, start_time, end_time = datetime.datetime.utcnow(),
-               time_delta = datetime.timedelta(hours=1), market=None, verbose=True):
+               market=None, verbose=True):
         if market is None:
             self.market = Market()
         else:
             self.market = market
         self.trader = trader
-        self.time_delta = time_delta
         self.start_time = start_time
         self.end_time = end_time
         self.time = start_time
@@ -28,8 +27,8 @@ class Simulator(object):
             log.info("Coin value: {:8.2f}".format(port_val))
             log.info("funds: {:13.2f}".format(self.trader.funds))
             log.info("Sum: {:15.2f}".format(self.trader.funds + port_val))
-        self.trader.policy(self.trader, self.time, self.steps)
-        self.time += self.time_delta
+        time_delta = self.trader.policy(self.trader, self.time, self.steps)
+        self.time += time_delta
         self.steps += 1
 
     def run(self):
@@ -42,17 +41,17 @@ class Simulator(object):
         log.info("Ran {} steps from {} to {}.".format(self.steps, self.start_time, self.time))
         log.info("Trader finished with {:8.2f}.".format(self.trader.funds))
 
-def simulate():
+def simulate(policy):
     """
     Function which sets up and runs the simulator.
     """
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(1)
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(7)
     start_funds = 100.
     auth = util.get_postgres_auth()
     db = database.DatabaseConnection(**auth)
     market = Market(db)
     trader = Trader(db, start_funds, market)
-    trader.policy = policies.raiblocks_yolo_policy
+    trader.policy = policy
     sim = Simulator(trader, start_time, market=market)
     market.setSimulator(sim)
     sim.run()

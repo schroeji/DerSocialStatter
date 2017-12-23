@@ -1,6 +1,10 @@
-import requests
 import json
 
+import requests
+
+import util
+
+log = util.setup_logger(__name__)
 class CoinCap(object):
     """
     A class which manages connections to the CoinMarketCap.com API
@@ -26,23 +30,30 @@ class CoinCap(object):
         data = json.loads(resp.text)
         return [ [coin["id"], coin["name"], coin["symbol"]] for coin in data]
 
-    def get_coin_price_data(self, coin_names):
+    def get_coin_price_data(self, coin_name_array):
         """
-        get the price data for all coin in coins
+        get the price data for all coins in coin_name_array
         """
         json_url = "{}?limit={}".format(self.url, 500)
         resp = requests.get(url=json_url)
         data = json.loads(resp.text)
         d = {}
-        for coin in data:
-            normalized_id = "".join(x for x in coin["id"] if x.isalnum())
-            if normalized_id in coin_names or coin["id"] in coin_names or coin["name"] in coin_names:
-                d[normalized_id] = {
-                    "coin_id" : coin["id"],
-                    "coin_name" : coin["name"],
-                    "symbol" : coin["symbol"],
-                    "percent_change_1h" : coin["percent_change_1h"],
-                    "percent_change_24h" : coin["percent_change_24h"],
-                    "price" : coin["price_usd"],
-                }
+        for coin in coin_name_array:
+            matched = False
+            for api_coin in data:
+                normalized_id = "".join(x for x in api_coin["id"] if x.isalnum()).lower()
+                if (normalized_id in coin) or (api_coin["id"] in coin) or \
+                   (api_coin["name"] in coin) or (api_coin["symbol"] in coin):
+                    d[normalized_id] = {
+                        "coin_id" : api_coin["id"],
+                        "coin_name" : api_coin["name"],
+                        "symbol" : api_coin["symbol"],
+                        "percent_change_1h" : api_coin["percent_change_1h"],
+                        "percent_change_24h" : api_coin["percent_change_24h"],
+                        "price" : api_coin["price_usd"],
+                    }
+                    matched = True
+                    break
+            if not matched:
+                log.warining("No match for {}".format(coin[0]))
         return d

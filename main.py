@@ -8,6 +8,7 @@ from coinmarketcap import CoinCap
 from database import DatabaseConnection
 from reddit import RedditStats
 from settings import general
+from simulator import policies
 
 log = util.setup_logger(__name__)
 GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
@@ -41,8 +42,9 @@ def collect_price(coin_name_array):
     db = DatabaseConnection(**auth)
     cap = CoinCap()
     time = datetime.datetime.utcnow()
-    # time = time.strftime("%s")
-    price_data = cap.get_coin_price_data([c[0] for c in coin_name_array])
+    price_data = cap.get_coin_price_data(coin_name_array)
+    if (len(price_data) != len(coin_name_array)):
+        log.warning("No price data for {} coins!".format(len(coin_name_array) - len(price_data)))
     for k, d in price_data.items():
         d["time"] = time
         for coin in coin_name_array:
@@ -114,7 +116,7 @@ def main():
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        simulator.simulate()
+        simulator.simulate(policies.largest_24h_increase_policy)
 
 if __name__ == "__main__":
     main()

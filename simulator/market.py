@@ -1,3 +1,5 @@
+import datetime
+
 import database
 import settings
 import util
@@ -23,7 +25,7 @@ class Trader(object):
         self.db = db
 
     def policy(self, time, step_nr):
-        pass
+        return datetime.timedelta(hours=1)
 
 class Market(object):
     """
@@ -71,6 +73,7 @@ class Market(object):
         current_value = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
         dollars = (1-self.fees) * total * current_value
         trader.funds += dollars
+        self.portfolio[coin] -= total
         if self.verbose:
             log.info("Sold {:8.4f} {} for ${:5.2f}.".format(total, coin, dollars))
 
