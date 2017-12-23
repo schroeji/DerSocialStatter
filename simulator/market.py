@@ -25,6 +25,10 @@ class Trader(object):
         self.db = db
 
     def policy(self, time, step_nr):
+        """
+        This function should be overwritten by the desired policy.
+        Should return a timedelta object when the next simulation step is performed.
+        """
         return datetime.timedelta(hours=1)
 
 class Market(object):
@@ -32,7 +36,7 @@ class Market(object):
     A class which can simulate the interaction with a market for a trader.
     """
 
-    def __init__(self, db, simulator=None, coins=None, fees=0, verbose=True):
+    def __init__(self, db, simulator=None, trader=None, coins=None, fees=0, verbose=True):
         if coins is None:
             coins = util.read_csv(settings.general["subreddit_file"])
         self.fees = fees
@@ -43,25 +47,29 @@ class Market(object):
         self.simulator = simulator
         self.verbose = verbose
         self.transaction_log = {}
+        self.trader = trader
 
     def setSimulator(self, sim):
         self.simulator = sim
 
-    def buy(self, trader, coin, total):
+    def setTrader(self, trader):
+        self.trader = trader
+
+    def buy(self, coin, total):
         """
         Allows a trader to buy coins in this market.
         If he has enough funds.
         """
-        if (trader.funds < total or total == 0.0):
+        if (self.trader.funds < total or total == 0.0):
             raise InsufficientFundsException("FUNDS")
         current_price = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
-        trader.funds -= total
+        self.trader.funds -= total
         bought_coins = total * (1-self.fees) / current_price
         self.portfolio[coin] += bought_coins
         if self.verbose:
             log.info("Bought {:8.4f} {} for {:5.2f}.".format(bought_coins, coin, total))
 
-    def sell(self, trader, coin, total=None):
+    def sell(self, coin, total=None):
         """
         Allows a trader to sell coins in this market.
         If total is not given all coins of the given type will be sold.
@@ -72,7 +80,7 @@ class Market(object):
             raise InsufficientFundsException(coin)
         current_value = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
         dollars = (1-self.fees) * total * current_value
-        trader.funds += dollars
+        self.trader.funds += dollars
         self.portfolio[coin] -= total
         if self.verbose:
             log.info("Sold {:8.4f} {} for ${:5.2f}.".format(total, coin, dollars))
@@ -90,15 +98,15 @@ class Market(object):
     def current_balance(self, coin):
         return self.portfolio[coin]
 
-    def sell_all(self, trader):
+    def sell_all(self):
         """
         Will sell all coins the trader owns.
         """
         for coin, balance in self.portfolio.items():
             if balance > 0:
-                self.sell(trader, coin)
+                self.sell(coin)
 
-    def portfolio_value(self, trader):
+    def portfolio_value(self):
         """
         Returns the current total value of the portfolio.
         """

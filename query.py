@@ -1,14 +1,13 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-
-from database import DatabaseConnection
-import numpy as np
 import datetime
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+
 import util
+from database import DatabaseConnection
 from settings import general
 
 # TODO better error handling
@@ -49,7 +48,6 @@ def growth_in_interval(db, subreddits, start, end):
             mean_growths.append((subr, growth))
     sorted_growths = sorted(mean_growths, key=lambda subr: subr[1])
     return sorted_growths
-
 
 def plot_growth(db, subreddit_list, start=None, end=None, with_respect_to_begin=False):
     if start is None:
@@ -99,7 +97,7 @@ def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     submission_rate[0] = max(subscriber_rate[0], 0)
     comment_rate[0] = max(subscriber_rate[0], 0)
     mention_rate[0] = max(subscriber_rate[0], 0)
-    # cal the grwoth for the given rates
+    # calc the growth for the given rates
     subscriber_rate_growth =  (sum(subscriber_rate) + total_hours) / (total_hours * (subscriber_rate[0] + 1))
     submission_rate_growth = (sum(submission_rate) + total_hours) / (total_hours * (submission_rate[0] + 1))
     comment_rate_growth = (sum(comment_rate) + total_hours) / (total_hours * (comment_rate[0] + 1))

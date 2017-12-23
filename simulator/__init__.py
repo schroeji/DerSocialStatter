@@ -22,7 +22,7 @@ class Simulator(object):
 
     def simulation_step(self):
         if self.verbose:
-            port_val = self.market.portfolio_value(self.trader)
+            port_val = self.market.portfolio_value()
             log.info("Time: {}".format(self.time))
             log.info("Coin value: {:8.2f}".format(port_val))
             log.info("funds: {:13.2f}".format(self.trader.funds))
@@ -36,7 +36,7 @@ class Simulator(object):
         self.steps = 0
         while self.time < self.end_time:
             self.simulation_step()
-        self.market.sell_all(self.trader)
+        self.market.sell_all()
         log.info("Simulation finished:")
         log.info("Ran {} steps from {} to {}.".format(self.steps, self.start_time, self.time))
         log.info("Trader finished with {:8.2f}.".format(self.trader.funds))
@@ -54,4 +54,5 @@ def simulate(policy):
     trader.policy = policy
     sim = Simulator(trader, start_time, market=market)
     market.setSimulator(sim)
+    market.setTrader(trader)
     sim.run()
