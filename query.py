@@ -1,9 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 import datetime
+import time
 
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 
 import util
@@ -28,6 +27,7 @@ def calc_mean_growth(metrics):
         else:
             growths.append((m1-m2)/m2)
     return np.mean(growths)
+
 def recent_growth(db, subreddits):
     mean_growths = []
     for subr in subreddits:
@@ -37,48 +37,6 @@ def recent_growth(db, subreddits):
             mean_growths.append((subr, growth))
     sorted_growths = sorted(mean_growths, key=lambda subr: subr[1])
     return sorted_growths
-
-def growth_in_interval(db, subreddits, start, end):
-    mean_growths = []
-    for subr in subreddits:
-        m = db.get_metrics_for_subreddit(subr, start=start, end=end)
-        if len(m) >= 2:
-            metrics = [m[0], m[-1]]  #newest and oldest element in interval
-            growth = calc_mean_growth(metrics)
-            mean_growths.append((subr, growth))
-    sorted_growths = sorted(mean_growths, key=lambda subr: subr[1])
-    return sorted_growths
-
-def plot_growth(db, subreddit_list, start=None, end=None, with_respect_to_begin=False):
-    if start is None:
-        start = datetime.datetime.utcnow() - datetime.timedelta(1)
-    if end is None:
-        end = datetime.datetime.utcnow()
-    assert start < end
-    log.info(subreddit_list)
-    for subr in subreddit_list:
-        list_of_dates = []
-        growths = []
-        m = db.get_rows_for_subreddit(subr, start=start, end=end)
-        m.reverse()
-        if (len(m) <= 2):
-            log.info("Not enough data points in interval for %s." % (format(subr)))
-            continue
-        list_of_dates.append(m[0][0])
-        growths.append(0)
-        for i in range(1, len(m)):
-            list_of_dates.append(m[i][0])
-            current_val = m[i][2:]
-            if with_respect_to_begin:
-                compare_val = m[0][2:]
-                growths.append(calc_mean_growth([current_val, compare_val]))
-            else:
-                compare_val = m[i-1][2:]
-                growths.append(growths[-1] + calc_mean_growth([current_val, compare_val]))
-        dates = matplotlib.dates.date2num(list_of_dates)
-        plt.plot_date(dates, growths, "-", label=subr)
-    plt.legend()
-    plt.show()
 
 def averaged_interval_growth_rate(db, subreddit, start, end, weights=None):
     """
@@ -145,14 +103,70 @@ def prep_prediction_data(db, coin_name_array):
     print(sorted_means)
     util.export_to_csv("pred.csv", preds, append=False)
 
+def percentage_price_growths(db, subreddits, start, end):
+    price_data = db.get_all_price_data_in_interval(start, end)
+    result = []
+    for sub in subreddits:
+        # find first price
+        found_row = False
+        for row in price_data:
+            if row[0] == sub:
+                price1 = row[1]
+                found_row = True
+                break
+        if not found_row:
+            log.info("No price data for {} in interval {} to {}".format(sub, start, end))
+            continue
+            # raise ValueError("No price data for {} in interval {} to {}".format(sub, start, end))
+
+        # find last price
+        for row in reversed(price_data):
+            if row[0] == sub:
+                price2 = row[1]
+                break
+        result.append([sub, (price2 - price1) / price1 * 100])
+    result = sorted(result, key=lambda subr: subr[1])
+    return result
+
+def sorted_average_growth(db, subreddits, start_time, end_time):
+    """
+    Returns the subreddit with the biggest (relative) mean growth in the last 12hrs.
+    Calculates the growth for the interval timestamp - hours until timestamp.
+    """
+    data_points = db.get_all_data_in_interval(start_time, end_time)
+    result = []
+    for sub in subreddits:
+        # find first price
+        found_row = False
+        for row in data_points:
+            if row[0] == sub:
+                metrics1 = row[1:5]
+                found_row = True
+                break
+        if not found_row:
+            log.info("No subreddit data for {} in interval {} to {}".format(sub, start_time, end_time))
+            continue
+            # raise ValueError("No price data for {} in interval {} to {}".format(sub, start, end))
+        # find last price
+        for row in reversed(data_points):
+            if row[0] == sub:
+                metrics2 = row[1:5]
+                break
+        result.append([sub, calc_mean_growth([metrics1, metrics2])])
+    result = sorted(result, key=lambda subr: subr[1])
+    return result
+
 def main():
+    coin_name_array = util.read_subs_from_file(general["subreddit_file"])
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
-    coin_name_array = util.read_subs_from_file(general["subreddit_file"])
-    coin_name_array = coin_name_array[10:] # skip recently added
-    prep_training_data(db, coin_name_array, datetime.timedelta(hours=24), 2)
-    prep_prediction_data(db, coin_name_array)
+    all_subreddits = [coin[-1] for coin in coin_name_array]
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=25)
+    end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=23)
+    # growths = percentage_price_growths(db, all_subreddits, start_time, end_time)
+    growths = sorted_average_growth(db, all_subreddits, start_time, end_time)
+    print(growths)
     db.close()
 
 if __name__ == "__main__":

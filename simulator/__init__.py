@@ -45,7 +45,7 @@ def simulate(policy):
     """
     Function which sets up and runs the simulator.
     """
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(7)
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(2)
     start_funds = 100.
     auth = util.get_postgres_auth()
     db = database.DatabaseConnection(**auth)

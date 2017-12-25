@@ -97,6 +97,16 @@ class DatabaseConnection(object):
         weight_older = (timestamp - next_older[0]) / interval
         return weight_newer*np.array(next_newer[1:]) + weight_older*np.array(next_older[1:])
 
+
+    def get_all_price_data_in_interval(self, start, end):
+        """
+        Returns all data points for all subreddits in the given interval
+        """
+        querystr = "SELECT subreddit, price, percent_change_1h, percent_change_24h \
+                FROM price WHERE time > %s AND time < %s ORDER BY time DESC"
+        self.cur.execute(querystr, (start, end))
+        return self.cur.fetchall()
+
     # ------------ data table ------------
 
     def data_table_exists(self):
@@ -171,16 +181,40 @@ class DatabaseConnection(object):
         if start is None and end is None:
             querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
                     submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
-                    AND end_time in (SELECT DISTINCT end_time FROM data ORDER BY end_time DESC LIMIT 2) \
-                    ORDER BY end_time DESC LIMIT 2"
+                    AND time in (SELECT DISTINCT time FROM data ORDER BY time DESC LIMIT 2) \
+                    ORDER BY time DESC LIMIT 2"
             self.cur.execute(querystr, (subreddit,))
         else:
             if start is None: start = datetime.datetime.fromtimestamp(0)
             if end is None: end = datetime.datetime.utcnow()
             querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
                     submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
-                    AND end_time < %s AND start_time > %s ORDER BY end_time DESC"
+                    AND time < %s AND time > %s ORDER BY time DESC"
             self.cur.execute(querystr, (subreddit, end, start))
+        return self.cur.fetchall()
+
+    def get_data_for_subreddit(self, subreddit, time):
+        """
+        Returns the most recent (i.e. the next older ) metrics tuple
+        for the subreddit and timestamp.
+        """
+        querystr = "SELECT subscribers, submission_rate, comment_rate, mention_rate, \
+                submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE subreddit=%s \
+                AND time < %s ORDER BY time DESC"
+        self.cur.execute(querystr, (subreddit, time))
+        next_older = self.cur.fetchone()
+        if next_older is None:
+            raise ValueError("Cannot get data for given timestamp, subreddit: {} {}".format(timestamp, subreddit))
+        return next_older
+
+    def get_all_data_in_interval(self, start, end):
+        """
+        Returns all data points for all subreddits in the given interval
+        """
+        querystr = "SELECT subreddit, subscribers, submission_rate, comment_rate, mention_rate, \
+                submission_rate_1h, comment_rate_1h, mention_rate_1h FROM data WHERE \
+                time > %s AND time < %s ORDER BY time DESC"
+        self.cur.execute(querystr, (start, end))
         return self.cur.fetchall()
 
     def get_interpolated_data(self, subreddit, timestamp):
