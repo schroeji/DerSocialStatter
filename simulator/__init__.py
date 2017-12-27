@@ -41,11 +41,10 @@ class Simulator(object):
         log.info("Ran {} steps from {} to {}.".format(self.steps, self.start_time, self.time))
         log.info("Trader finished with {:8.2f}.".format(self.trader.funds))
 
-def simulate(policy):
+def simulate(policy, start_time):
     """
     Function which sets up and runs the simulator.
     """
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(2)
     start_funds = 100.
     auth = util.get_postgres_auth()
     db = database.DatabaseConnection(**auth)

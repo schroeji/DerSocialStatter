@@ -103,7 +103,7 @@ def prep_prediction_data(db, coin_name_array):
     print(sorted_means)
     util.export_to_csv("pred.csv", preds, append=False)
 
-def percentage_price_growths(db, subreddits, start, end):
+def percentage_price_growths(db, subreddits, start, end, sort=True):
     price_data = db.get_all_price_data_in_interval(start, end)
     result = []
     for sub in subreddits:
@@ -125,10 +125,11 @@ def percentage_price_growths(db, subreddits, start, end):
                 price2 = row[1]
                 break
         result.append([sub, (price2 - price1) / price1 * 100])
-    result = sorted(result, key=lambda subr: subr[1])
+    if sort:
+        result = sorted(result, key=lambda subr: subr[1])
     return result
 
-def sorted_average_growth(db, subreddits, start_time, end_time):
+def average_growth(db, subreddits, start_time, end_time, sort=True):
     """
     Returns the subreddit with the biggest (relative) mean growth in the last 12hrs.
     Calculates the growth for the interval timestamp - hours until timestamp.
@@ -153,8 +154,28 @@ def sorted_average_growth(db, subreddits, start_time, end_time):
                 metrics2 = row[1:5]
                 break
         result.append([sub, calc_mean_growth([metrics1, metrics2])])
-    result = sorted(result, key=lambda subr: subr[1])
+    if sort:
+        result = sorted(result, key=lambda subr: subr[1])
     return result
+
+def covariance(db, subreddits):
+    days = 2
+    delta = datetime.timedelta(hours=12)
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(days)
+    end_time = start_time + delta
+    sub_growths = []
+    price_growths = []
+    for i in range(days):
+        sub_growths += [g[1] for g in average_growth(db, subreddits, start_time, end_time, sort=False)]
+        price_growths += [p[1] for p in percentage_price_growths(db, subreddits, start_time + delta, end_time + delta, sort=False)]
+        start_time += delta
+        end_time += delta
+    print(sub_growths)
+    print(price_growths)
+    sub_growths = np.array(sub_growths)*100
+    price_growths = np.array(price_growths)
+    arr = np.vstack((sub_growths, price_growths))
+    print(np.cov(arr))
 
 def main():
     coin_name_array = util.read_subs_from_file(general["subreddit_file"])
@@ -162,11 +183,11 @@ def main():
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     all_subreddits = [coin[-1] for coin in coin_name_array]
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=25)
-    end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=23)
+    # start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=25)
+    # end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=23)
     # growths = percentage_price_growths(db, all_subreddits, start_time, end_time)
-    growths = sorted_average_growth(db, all_subreddits, start_time, end_time)
-    print(growths)
+    # growths = sorted_average_growth(db, all_subreddits, start_time, end_time)
+    covariance(db, all_subreddits)
     db.close()
 
 if __name__ == "__main__":

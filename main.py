@@ -116,7 +116,10 @@ def main():
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        simulator.simulate(policies.subreddit_growth_policy)
+        start_time = datetime.datetime.utcnow() - datetime.timedelta(5)
+        # simulator.simulate(policies.largest_xhr_policy)
+        simulator.simulate(policies.largest_24h_increase_policy, start_time)
+        # simulator.simulate(policies.subreddit_growth_policy)
 
 if __name__ == "__main__":
     main()
