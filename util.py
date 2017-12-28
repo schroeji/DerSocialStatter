@@ -1,6 +1,8 @@
-from settings import general
-import logging
 import json
+import logging
+
+from settings import general
+
 
 def setup_logger(name, log_file=None, level=logging.INFO):
     """
@@ -60,7 +62,6 @@ def read_csv(path):
     for r in rows:
         result.append(r.split(","))
     return result[:-1]
-
 
 def read_subs_from_file(path):
     return read_csv(path)

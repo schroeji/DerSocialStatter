@@ -1,10 +1,16 @@
-import praw
 import datetime
-import numpy as np
 import re
+
+import numpy as np
+import praw
+
 import util
-# add logging
+from coinmarketcap import CoinCap
+
+log = util.setup_logger(__name__)
+
 HOUR_IN_SECONDS = 3600
+GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
 
 class RedditStats(object):
 
@@ -68,7 +74,7 @@ class RedditStats(object):
             comments_per_sec_in_1_h = float(cntone)/HOUR_IN_SECONDS
         return (comments_per_sec_in_x_h*HOUR_IN_SECONDS, comments_per_sec_in_1_h*HOUR_IN_SECONDS)
 
-    def get_mentions(self, coin_name_array, subreddit_list, hours=None, include_submissions=False):
+    def get_mentions(self, coin_name_array, hours=None, include_submissions=False):
         """
         counts how often words from coin_name_tuple were mentioned in subreddits from subreddit list
         since start
@@ -87,7 +93,7 @@ class RedditStats(object):
             regex_list.append(re.compile(pattern, re.I|re.UNICODE))
         comm_created = float('inf')
         submission_created = float('inf')
-        for sub in subreddit_list:
+        for sub in GENERAL_SUBS:
             comments = self.reddit.subreddit(sub).comments(limit=1024)
             # search in comments
             for comm in comments:
@@ -136,7 +142,6 @@ class RedditStats(object):
         """
         subreddit_names = []
         keywords = ["crypto", "blockchain", "decentral", "currency", "coin", "trading"]
-        # ignore_subs = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet"]
         pattern = "|".join(keywords)
         regex = re.compile(pattern, re.I|re.UNICODE)
         for name in coin_name_list:
@@ -147,24 +152,53 @@ class RedditStats(object):
                 description = str(sub.description)
             except:
                 sub_found = False
-                # print("Sub {} does not exist".format(name))
 
             if not sub_found or (re.search(regex, description) == None and re.search(regex, public_description) == None):
                 # no keyword appears in subreddit description
                 # it's probably not crypto coin related
-                print("Sub {} not found or is not crypto related.".format(name))
+                log.info("Sub {} not found or is not crypto related.".format(name))
                 # finding alternatives
                 # works poorly so its deactivated
                 # print("Alternatives:")
-                # candidates = self.reddit.subreddits.search(name + " coin")
-                # for candidate in candidates:
-                #     if candidate.display_name.lower() in ignore_subs:
-                #         continue
-                #     public_description = str(candidate.public_description)
-                #     description = str(candidate.description)
-                #     if not (re.search(regex, description) == None and re.search(regex, public_description) == None):
-                #         print(candidate.display_name)
-                        # subreddit_names.append(name)
+                candidates = self.reddit.subreddits.search(name + " coin")
+                found_alt = False
+                for candidate in candidates:
+                    if candidate.display_name.lower() in GENERAL_SUBS:
+                        continue
+                    public_description = str(candidate.public_description)
+                    description = str(candidate.description)
+                    if not (re.search(regex, description) == None and re.search(regex, public_description) == None):
+                        # print(candidate.display_name)
+                        subreddit_names.append(name)
+                        found_alt = True
+                        break
+                if not found_alt:
+                    subreddit_names.append("")
             else:
                 subreddit_names.append(name)
         return subreddit_names
+
+    def find_by_symbols(self, path):
+        """
+        Helps finding subreddits for coins which cannot be found with the find_subreddits command.
+        path: Path to file with a list of coin SYMBOLS (i.e. BTC, ETH, ...)
+        """
+        a = util.read_csv(path)
+        symbols = [s[0] for s in a]
+        cap = CoinCap()
+        coins = cap.get_coin_aliases(1000)
+        coin_name_array = []
+        for coin in coins:
+            if coin[-1] in symbols:
+                coin_name_array.append(coin)
+        if(len(symbols) != len(coin_name_array)):
+            log.info("No coin data for {} coins.".format(len(symbols) - len(coin_name_array)))
+        coin_name_array = sorted(coin_name_array, key=lambda c: c[-1])
+        for coin_tuple in coin_name_array:
+            coin_tuple.append("".join(x for x in coin_tuple[0] if x.isalnum()))
+        subreddit_list = self.find_subreddits([name[-1] for name in coin_name_array])
+        print(len(subreddit_list))
+        print(len(coin_name_array))
+        for i,coin in enumerate(coin_name_array):
+            coin[-1] = subreddit_list[i]
+        return coin_name_array

@@ -11,7 +11,6 @@ from settings import general
 from simulator import policies
 
 log = util.setup_logger(__name__)
-GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
 
 def collect(coin_name_array, hours=12):
     """
@@ -22,7 +21,7 @@ def collect(coin_name_array, hours=12):
     stat = RedditStats()
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
-    mentions = stat.get_mentions(coin_name_array, GENERAL_SUBS, hours=hours, include_submissions=True)
+    mentions = stat.get_mentions(coin_name_array, hours=hours, include_submissions=True)
     log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
         subreddit = coin_tuple[-1]
@@ -85,6 +84,8 @@ def main():
                         help="Collect coin price information into the database.")
     parser.add_argument("--run_sim", default=False, action='store_true',
                         help="Run simulation.")
+    parser.add_argument("--find_by_symbols", default=False, action='store_true',
+                        help="Find coins and subreddits using symbols.csv.")
     args = parser.parse_args()
     # -----------------------------------
 
@@ -120,6 +121,12 @@ def main():
         # simulator.simulate(policies.largest_xhr_policy)
         simulator.simulate(policies.largest_24h_increase_policy, start_time)
         # simulator.simulate(policies.subreddit_growth_policy)
+
+    if args.find_by_symbols:
+        stat = RedditStats()
+        subs = stat.find_by_symbols("symbols.csv")
+        util.write_subs_to_file("symbols_subs.csv", subs)
+
 
 if __name__ == "__main__":
     main()

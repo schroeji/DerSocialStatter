@@ -5,7 +5,7 @@ import query
 import settings
 import util
 
-SCALE_SPENDINGS = True
+SCALE_SPENDINGS = False
 K = 4
 STEP_HOURS = 12
 
@@ -41,7 +41,7 @@ def largest_24h_increase_policy(self, time, step_nr):
         funds = self.funds
     else:
         spend = int((self.funds / K) * 100) / 100.
-    for i in range(k):
+    for i in range(K):
         if SCALE_SPENDINGS:
             spend = int((gains[i][1]/gains_sum) * funds * 100) / 100.
         self.market.buy(gains[i][0], spend)
@@ -65,7 +65,7 @@ def largest_xhr_policy(self, time, step_nr):
 
 def subreddit_growth_policy(self, time, step_nr):
     """
-    Buy those k coins which subreddit experienced the biggest growth in the last x hrs.
+    Buy those K coins which subreddit experienced the biggest growth in the last x hrs.
     """
     if step_nr == 0:
         self.all_subs = self.market.portfolio.keys()
@@ -82,8 +82,8 @@ def subreddit_growth_policy(self, time, step_nr):
         growth_sum = sum([growths[i][1] for i in range(K)])
         funds = self.funds
     else:
-        spend = int((self.funds / k) * 100) / 100.
-    for i in range(k):
+        spend = int((self.funds / K) * 100) / 100.
+    for i in range(K):
         # scale spend money realtive with sub growth
         if SCALE_SPENDINGS:
             spend = int((growths[i][1]/growth_sum) * funds * 100) / 100.
