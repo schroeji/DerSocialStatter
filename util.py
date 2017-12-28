@@ -65,3 +65,21 @@ def read_csv(path):
 
 def read_subs_from_file(path):
     return read_csv(path)
+
+def sort_by_symbol(coin_name_array):
+    return sorted(coin_name_array, key=lambda c: c[-2])
+
+def merge_coin_arrays(arr1, arr2):
+    result = []
+    for a1 in arr1:
+        result.append(a1)
+        for a2 in arr2:
+            if a1[-2] == a2[-2] and a1 != a2:
+                log.info("Conflicting entries:")
+                log.info(a1)
+                log.info(a2)
+
+    for a2 in arr2:
+        if not a2[-2] in [a1[-2] for a1 in arr1]:
+            result.append(a2)
+    return result
