@@ -130,3 +130,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # binance_coins = util.read_subs_from_file("binance.csv")
+    # subs = util.read_subs_from_file("sorted_subs.csv")
+    # subs = util.sort_by_symbol(subs)
+    # res = util.merge_coin_arrays(binance_coins, subs)
+    # util.write_subs_to_file("sorted_subs.csv", subs)
