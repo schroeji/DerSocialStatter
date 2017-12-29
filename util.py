@@ -47,10 +47,10 @@ def export_to_csv(path, data_array, append=False):
     string = "\n".join([",".join([str(e) for e in tup]) for tup in data_array])
     if append:
         f = open(path, "a")
-        f.write("\n")
     else:
         f = open(path, "w")
     f.write(string)
+    f.write("\n")
     f.close()
 
 def read_csv(path):
@@ -61,7 +61,8 @@ def read_csv(path):
     result = []
     for r in rows:
         result.append(r.split(","))
-    return result[:-1]
+    result.remove([""])
+    return result
 
 def read_subs_from_file(path):
     return read_csv(path)

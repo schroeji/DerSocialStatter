@@ -60,7 +60,7 @@ class Market(object):
         Allows a trader to buy coins in this market.
         If he has enough funds.
         """
-        if (self.trader.funds < total or total == 0.0):
+        if (self.trader.funds < total or total <= 0.0):
             raise InsufficientFundsException("FUNDS")
         current_price = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
         self.trader.funds -= total
@@ -76,7 +76,7 @@ class Market(object):
         """
         if total is None:
             total = self.portfolio[coin]
-        if self.portfolio[coin] < total or total == 0:
+        if self.portfolio[coin] < total or total <= 0:
             raise InsufficientFundsException(coin)
         current_value = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
         dollars = (1-self.fees) * total * current_value
@@ -116,3 +116,8 @@ class Market(object):
                 current_value = self.db.get_interpolated_price_data(coin, self.simulator.time)[0]
                 total_value += current_value * balance
         return total_value
+
+    def create_binance_market(db):
+        coins = util.read_csv(settings.general["binance_file"])
+        fee = 0.0001
+        return Market(db, fees=fee, coins=coins)

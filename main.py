@@ -49,6 +49,7 @@ def collect_price(coin_name_array):
         for coin in coin_name_array:
             if k in coin:
                 d["subreddit"] = coin[-1]
+                break
         log.info("Got price for: %s" % (d["subreddit"]))
         db.insert_price(d)
     db.close()
@@ -117,10 +118,13 @@ def main():
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        start_time = datetime.datetime.utcnow() - datetime.timedelta(5)
-        # simulator.simulate(policies.largest_xhr_policy)
-        simulator.simulate(policies.largest_24h_increase_policy, start_time)
-        # simulator.simulate(policies.subreddit_growth_policy)
+        start_time = datetime.datetime.utcnow() - datetime.timedelta(1)
+        policy_list = [
+            policies.subreddit_growth_policy,
+            # policies.largest_24h_increase_policy,
+            # policies.largest_xhr_policy
+        ]
+        simulator.simulate(policy_list, start_time)
 
     if args.find_by_symbols:
         stat = RedditStats()
@@ -130,8 +134,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # binance_coins = util.read_subs_from_file("binance.csv")
-    # subs = util.read_subs_from_file("sorted_subs.csv")
-    # subs = util.sort_by_symbol(subs)
-    # res = util.merge_coin_arrays(binance_coins, subs)
-    # util.write_subs_to_file("sorted_subs.csv", subs)
