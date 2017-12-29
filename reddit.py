@@ -57,17 +57,27 @@ class RedditStats(object):
         comm = self.reddit.subreddit(subreddit).comments(limit=1024)
         cntagg = 0
         cntone = 0
+        exit_by_break = False
         for c in comm:
             cntagg += 1
             if c.created_utc > int(start_one.timestamp()):
                 cntone += 1
             if c.created_utc < int(start.timestamp()):
+                exit_by_break = True
                 break
             last_created = c.created_utc
+
         if cntagg <= 1:
             comments_per_sec_in_x_h = 0.
         else:
-            comments_per_sec_in_x_h = float(cntagg)/np.abs(int(self.default_end.timestamp()) - int(last_created))
+            if exit_by_break:
+                # if we exit by break we have seen all comments in the given interval
+                # => divide by length of interval
+                comments_per_sec_in_x_h = float(cntagg)/np.abs(int(self.default_end.timestamp()) - int(start.timestamp()))
+            else:
+                # if we dont exit by break we have only seen the first 1000 comments
+                # => extrapolate by dividing with the shorter interval
+                comments_per_sec_in_x_h = float(cntagg)/np.abs(int(self.default_end.timestamp()) - int(last_created))
         if cntone <= 1:
             comments_per_sec_in_1_h = 0.
         else:
