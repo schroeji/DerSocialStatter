@@ -119,5 +119,10 @@ class Market(object):
 
     def create_binance_market(db):
         coins = util.read_csv(settings.general["binance_file"])
-        fee = 0.0001
+        fee = 0.001
+        return Market(db, fees=fee, coins=coins)
+
+    def create_poloniex_market(db):
+        coins = util.read_csv(settings.general["poloniex_file"])
+        fee = 0.0025
         return Market(db, fees=fee, coins=coins)

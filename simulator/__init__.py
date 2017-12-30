@@ -60,7 +60,8 @@ def simulate(policy_list, start_time):
         log.info("------ {} ------".format(policy.__name__))
         start_funds = 100.
         # market = Market(db)
-        market = Market.create_binance_market(db)
+        # market = Market.create_binance_market(db)
+        market = Market.create_poloniex_market(db)
         trader = Trader(db, start_funds, market)
         trader.policy = policy
         sim = Simulator(trader, start_time, market=market)
