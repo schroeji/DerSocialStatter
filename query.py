@@ -159,7 +159,7 @@ def average_growth(db, subreddits, start_time, end_time, sort=True):
     return result
 
 def covariance(db, subreddits):
-    days = 2
+    days = 1
     delta = datetime.timedelta(hours=12)
     start_time = datetime.datetime.utcnow() - datetime.timedelta(days)
     end_time = start_time + delta
@@ -184,13 +184,13 @@ def main():
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     all_subreddits = [coin[-1] for coin in coin_name_array]
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=48)
-    end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+    # start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+    # end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
     # end_time = datetime.datetime.utcnow()
     # growths = percentage_price_growths(db, all_subreddits, start_time, end_time)
-    growths = average_growth(db, all_subreddits, start_time, end_time)
-    print(growths)
-    # covariance(db, all_subreddits)
+    # growths = average_growth(db, all_subreddits, start_time, end_time)
+    # print(growths)
+    covariance(db, all_subreddits)
     db.close()
 
 if __name__ == "__main__":

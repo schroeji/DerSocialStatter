@@ -118,11 +118,11 @@ def main():
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        start_time = datetime.datetime.utcnow() - datetime.timedelta(1)
+        start_time = datetime.datetime.utcnow() - datetime.timedelta(7)
         policy_list = [
             policies.subreddit_growth_policy,
-            # policies.largest_24h_increase_policy,
-            # policies.largest_xhr_policy
+            policies.largest_24h_increase_policy,
+            policies.largest_xhr_policy,
         ]
         simulator.simulate(policy_list, start_time)
 

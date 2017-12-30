@@ -7,7 +7,7 @@ import util
 
 SCALE_SPENDINGS = False
 K = 4
-STEP_HOURS = 12
+STEP_HOURS = 24
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 
@@ -18,7 +18,7 @@ def raiblocks_yolo_policy(self, time, step_nr):
     """
     if step_nr == 0:
         self.market.buy("raiblocks", self.funds)
-    return datetime.timedelta(hours=24)
+    return datetime.timedelta(hours=STEP_HOURS)
 
 def largest_24h_increase_policy(self, time, step_nr):
     """
