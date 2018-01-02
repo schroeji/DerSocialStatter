@@ -179,7 +179,8 @@ def covariance(db, subreddits):
 
 def main():
     # coin_name_array = util.read_subs_from_file(general["subreddit_file"])
-    coin_name_array = util.read_subs_from_file(general["binance_file"])
+    # coin_name_array = util.read_subs_from_file(general["binance_file"])
+    coin_name_array = util.read_subs_from_file(general["poloniex_file"])
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()

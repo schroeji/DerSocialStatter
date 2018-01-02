@@ -89,3 +89,8 @@ def merge_coin_arrays(arr1, arr2):
         if not a2[-2] in [a1[-2] for a1 in arr1]:
             result.append(a2)
     return result
+
+def get_symbol_for_sub(coin_name_array, subreddit):
+    for coin in coin_name_array:
+        if coin[-1] == subreddit:
+            return coin[-2]
