@@ -1,13 +1,15 @@
 import datetime
 
+import numpy as np
+
 import database
 import query
 import settings
 import util
 
 SCALE_SPENDINGS = False
-K = 4
-STEP_HOURS = 24
+K = 2
+STEP_HOURS = 12
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 
@@ -54,7 +56,6 @@ def largest_24h_increase_policy(self, time, step_nr):
             spend = int((gains[i][1]/gains_sum) * funds * 100) / 100.
             if spend == 0:
                 continue
-        print(spend)
         self.market.buy(gains[i][0], spend)
     return datetime.timedelta(hours=STEP_HOURS)
 
@@ -91,7 +92,7 @@ def largest_xhr_policy(self, time, step_nr):
 
 def subreddit_growth_policy(self, time, step_nr):
     """
-    Buy those K coins with the biggest subbreddit grwoth in the last STEP_HOURS hours.
+    Buy those K coins with the biggest subbreddit growth in the last STEP_HOURS hours.
     """
     if step_nr == 0:
         self.all_subs = self.market.portfolio.keys()
@@ -103,7 +104,6 @@ def subreddit_growth_policy(self, time, step_nr):
     growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
     growths.reverse()
 
-    # split equally
     if SCALE_SPENDINGS:
         if USE_SMOOTHING and growths[K-1][1] < 0:
             for i in range(K):
@@ -112,6 +112,7 @@ def subreddit_growth_policy(self, time, step_nr):
         growth_sum = sum([growths[i][1] for i in range(K)])
         funds = self.funds
     else:
+        # split equally
         spend = int((self.funds / K) * 100) / 100.
     for i in range(K):
         # scale spend money realtive with sub growth
@@ -120,4 +121,46 @@ def subreddit_growth_policy(self, time, step_nr):
             if spend == 0:
                 continue
         self.market.buy(growths[i][0], spend)
+    return xhrs
+
+def hybrid_policy(self, time, step_nr):
+    """
+    Buy those K coins with the biggest subreddit and price growth in the last STEP_HOURS hours.
+    """
+    if step_nr == 0:
+        self.all_subs = self.market.portfolio.keys()
+    else:
+        self.market.sell_all()
+    xhrs =  datetime.timedelta(hours=STEP_HOURS)
+    start_time = time - xhrs
+    end_time = time
+    growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
+    # convert to percentages
+    for g in growths:
+        g[1] = g[1]*100. - 100.
+    gains = query.percentage_price_growths(self.db, self.all_subs, start_time, time)
+    combined = []
+    for sub_growth, growth in growths:
+        for sub_gain, gain in gains:
+            if sub_growth == sub_gain:
+                combined.append([sub_growth, np.average([growth, gain], weights=[0.2, 0.8])])
+    combined_growth = sorted(combined, key=lambda subr: subr[1])
+    combined_growth.reverse()
+    if SCALE_SPENDINGS:
+        if USE_SMOOTHING and combined_growth[K-1][1] < 0:
+            for i in range(K):
+                # => smallest gain will be 1 and the rest is adjusted accordingly
+                combined_growth[i][1] += -combined_growth[K-1][1] + 1
+        growth_sum = sum([combined_growth[i][1] for i in range(K)])
+        funds = self.funds
+    else:
+        # split equally
+        spend = int((self.funds / K) * 100) / 100.
+    for i in range(K):
+        # scale spend money realtive with sub growth
+        if SCALE_SPENDINGS:
+            spend = int((combined_growth[i][1]/growth_sum) * funds * 100) / 100.
+            if spend == 0:
+                continue
+        self.market.buy(combined_growth[i][0], spend)
     return xhrs

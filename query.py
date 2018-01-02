@@ -115,7 +115,7 @@ def percentage_price_growths(db, subreddits, start, end, sort=True):
                 found_row = True
                 break
         if not found_row:
-            log.info("No price data for {} in interval {} to {}".format(sub, start, end))
+            log.warn("No price data for {} in interval {} to {}".format(sub, start, end))
             continue
             # raise ValueError("No price data for {} in interval {} to {}".format(sub, start, end))
 
@@ -145,7 +145,7 @@ def average_growth(db, subreddits, start_time, end_time, sort=True):
                 found_row = True
                 break
         if not found_row:
-            log.info("No subreddit data for {} in interval {} to {}".format(sub, start_time, end_time))
+            log.warn("No subreddit data for {} in interval {} to {}".format(sub, start_time, end_time))
             continue
             # raise ValueError("No price data for {} in interval {} to {}".format(sub, start, end))
         # find last price
@@ -184,13 +184,13 @@ def main():
     db = DatabaseConnection(**auth)
     # all_subreddits = db.get_all_subreddits()
     all_subreddits = [coin[-1] for coin in coin_name_array]
-    # start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=12)
     # end_time = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
-    # end_time = datetime.datetime.utcnow()
+    end_time = datetime.datetime.utcnow()
     # growths = percentage_price_growths(db, all_subreddits, start_time, end_time)
-    # growths = average_growth(db, all_subreddits, start_time, end_time)
-    # print(growths)
-    covariance(db, all_subreddits)
+    growths = average_growth(db, all_subreddits, start_time, end_time)
+    print(growths)
+    # covariance(db, all_subreddits)
     db.close()
 
 if __name__ == "__main__":

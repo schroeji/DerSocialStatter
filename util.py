@@ -40,6 +40,11 @@ def get_postgres_auth():
         auth = json.load(f)
     return auth['postgres']
 
+def get_poloniex_auth():
+    with open(general["auth_file"]) as f:
+        auth = json.load(f)
+    return auth['poloniex']
+
 def write_subs_to_file(path, subreddit_list):
     export_to_csv(path, subreddit_list)
 
