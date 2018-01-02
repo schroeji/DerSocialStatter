@@ -2,6 +2,7 @@ import argparse
 import datetime
 import os
 
+import AutoTrader
 import simulator
 import util
 from coinmarketcap import CoinCap
@@ -86,7 +87,9 @@ def main():
     parser.add_argument("--run_sim", default=False, action='store_true',
                         help="Run simulation.")
     parser.add_argument("--find_by_symbols", default=False, action='store_true',
-                        help="Find coins and subreddits using symbols.csv.")
+                        help="Find coins and subreddits using 'symbols.csv'.")
+    parser.add_argument("--auto_trade", default=False, action='store_true',
+                        help="Run auto trader.")
     args = parser.parse_args()
     # -----------------------------------
 
@@ -113,16 +116,17 @@ def main():
         if os.path.exists(file_path):
             subs = util.read_subs_from_file(file_path)
             collect_price(subs)
-        else :
-            log.info("Collect price called but %s does not exist." % (file_path))
-            log.info("Run --find_subs first.")
+        else:
+            log.warn("Collect price called but %s does not exist." % (file_path))
+            log.warn("Run --find_subs first.")
 
     if args.run_sim:
         start_time = datetime.datetime.utcnow() - datetime.timedelta(7)
         policy_list = [
             policies.subreddit_growth_policy,
-            policies.largest_24h_increase_policy,
+            # policies.largest_24h_increase_policy,
             policies.largest_xhr_policy,
+            policies.hybrid_policy
         ]
         simulator.simulate(policy_list, start_time)
 
@@ -131,6 +135,9 @@ def main():
         subs = stat.find_by_symbols("symbols.csv")
         util.write_subs_to_file("symbols_subs.csv", subs)
 
+    if args.auto_trade:
+        auto = AutoTrader.AutoTrader("Poloniex")
+        auto.run()
 
 if __name__ == "__main__":
     main()
