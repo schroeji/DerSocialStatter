@@ -60,6 +60,8 @@ class RedditStats(object):
         cntone = 0
         exit_by_break = False
         for c in comm:
+            if c.created_utc > self.default_end.timestamp():
+                continue
             cntagg += 1
             if c.created_utc > int(start_one.timestamp()):
                 cntone += 1
