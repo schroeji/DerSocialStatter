@@ -8,8 +8,8 @@ import settings
 import util
 
 SCALE_SPENDINGS = False
-K = 2
-STEP_HOURS = 12
+K = 4
+STEP_HOURS = 23
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 

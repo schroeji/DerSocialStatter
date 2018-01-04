@@ -76,6 +76,10 @@ def sort_by_symbol(coin_name_array):
     return sorted(coin_name_array, key=lambda c: c[-2])
 
 def merge_coin_arrays(arr1, arr2):
+    """
+    Merges two coin name arrays.
+    Prints to log if there are conflicting entries.
+    """
     result = []
     for a1 in arr1:
         result.append(a1)
@@ -89,3 +93,30 @@ def merge_coin_arrays(arr1, arr2):
         if not a2[-2] in [a1[-2] for a1 in arr1]:
             result.append(a2)
     return result
+
+def get_symbol_for_sub(coin_name_array, subreddit):
+    """
+    Returns the symbol for a given subreddit.
+    """
+    for coin in coin_name_array:
+        if coin[-1] == subreddit:
+            return coin[-2]
+
+def known_subs_for_symbols(coin_name_array, symbols):
+    """
+    Finds already known subs for a list of symbols.
+    """
+    not_found = []
+    result = []
+    for symbol in symbols:
+        found_sub = False
+        for coin in coin_name_array:
+            if coin[-2] == symbol:
+                if found_sub == True:
+                    log.warn("Found 2 or more subreddits for %s pls resolve manually." % (symbol))
+                    continue
+                found_sub = True
+                result.append(coin)
+        if found_sub == False:
+            not_found.append(symbol)
+    return (not_found, result)

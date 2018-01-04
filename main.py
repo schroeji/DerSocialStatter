@@ -118,18 +118,20 @@ def main():
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        start_time = datetime.datetime.utcnow() - datetime.timedelta(7)
+        start_time = datetime.datetime.utcnow() - datetime.timedelta(12)
         policy_list = [
             policies.subreddit_growth_policy,
-            policies.largest_24h_increase_policy,
+            # policies.largest_24h_increase_policy,
             policies.largest_xhr_policy,
         ]
         simulator.simulate(policy_list, start_time)
 
     if args.find_by_symbols:
         stat = RedditStats()
-        subs = stat.find_by_symbols("symbols.csv")
-        util.write_subs_to_file("symbols_subs.csv", subs)
+        guesses, found = stat.find_by_symbols("symbols.csv")
+        util.write_subs_to_file("guesses.csv", guesses)
+        util.write_subs_to_file("found.csv", found)
+
 
 
 if __name__ == "__main__":
