@@ -126,3 +126,8 @@ class Market(object):
         coins = util.read_csv(settings.general["poloniex_file"])
         fee = 0.0025
         return Market(db, fees=fee, coins=coins)
+
+    def create_bittrex_market(db):
+        coins = util.read_csv(settings.general["bittrex_file"])
+        fee = 0.0025
+        return Market(db, fees=fee, coins=coins)

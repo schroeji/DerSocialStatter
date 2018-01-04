@@ -113,16 +113,17 @@ def main():
         if os.path.exists(file_path):
             subs = util.read_subs_from_file(file_path)
             collect_price(subs)
-        else :
+        else:
             log.info("Collect price called but %s does not exist." % (file_path))
             log.info("Run --find_subs first.")
 
     if args.run_sim:
-        start_time = datetime.datetime.utcnow() - datetime.timedelta(12)
+        start_time = datetime.datetime.utcnow() - datetime.timedelta(11)
         policy_list = [
             policies.subreddit_growth_policy,
             # policies.largest_24h_increase_policy,
             policies.largest_xhr_policy,
+            policies.hybrid_policy
         ]
         simulator.simulate(policy_list, start_time)
 
@@ -131,8 +132,6 @@ def main():
         guesses, found = stat.find_by_symbols("symbols.csv")
         util.write_subs_to_file("guesses.csv", guesses)
         util.write_subs_to_file("found.csv", found)
-
-
 
 if __name__ == "__main__":
     main()
