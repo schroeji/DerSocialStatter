@@ -1,6 +1,7 @@
 import datetime
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 import database
 import simulator.policies
@@ -50,25 +51,36 @@ class Simulator(object):
         log.info("Ran {} steps from {} to {}.".format(self.steps, self.start_time, self.time))
         log.info("Trader finished with {:8.2f}.".format(self.trader.funds))
 
+def average_percentage_gain(networth_history):
+    gains = []
+    for i in range(1, len(networth_history)):
+        gains.append((networth_history[i] - networth_history[i - 1]) / networth_history[i - 1])
+    gains = np.array(gains) * 100
+    print(gains)
+    return np.mean(gains)
+
 def simulate(policy_list, start_time):
     """
     Function which sets up and runs the simulator.
     """
     auth = util.get_postgres_auth()
     db = database.DatabaseConnection(**auth)
+    avg_percentage_gains = {}
     for policy in policy_list:
         log.info("------ {} ------".format(policy.__name__))
         start_funds = 100.
         # market = Market(db)
-        market = Market.create_binance_market(db)
-        # market = Market.create_poloniex_market(db)
+        # market = Market.create_binance_market(db)
+        market = Market.create_poloniex_market(db)
         trader = Trader(db, start_funds, market)
         trader.policy = policy
         sim = Simulator(trader, start_time, market=market)
         market.setSimulator(sim)
         market.setTrader(trader)
         sim.run()
+        avg_percentage_gains[policy.__name__] = average_percentage_gain(sim.networth_history)
         plt.plot_date(sim.date_history, sim.networth_history, "-", label=policy.__name__)
 
     plt.legend()
     plt.show()
+    print(avg_percentage_gains)
