@@ -132,8 +132,9 @@ def main():
 
     if args.find_by_symbols:
         stat = RedditStats()
-        subs = stat.find_by_symbols("symbols.csv")
-        util.write_subs_to_file("symbols_subs.csv", subs)
+        guesses, found = stat.find_by_symbols("symbols.csv")
+        util.write_subs_to_file("guesses.csv", guesses)
+        util.write_subs_to_file("found.csv", found)
 
     if args.auto_trade:
         auto = AutoTrader.AutoTrader("Poloniex")

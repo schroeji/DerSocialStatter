@@ -6,6 +6,7 @@ import praw
 
 import util
 from coinmarketcap import CoinCap
+from settings import general
 
 log = util.setup_logger(__name__)
 
@@ -59,6 +60,8 @@ class RedditStats(object):
         cntone = 0
         exit_by_break = False
         for c in comm:
+            if c.created_utc > self.default_end.timestamp():
+                continue
             cntagg += 1
             if c.created_utc > int(start_one.timestamp()):
                 cntone += 1
@@ -195,11 +198,14 @@ class RedditStats(object):
         """
         a = util.read_csv(path)
         symbols = [s[0] for s in a]
+        known_coin_name_array = util.read_subs_from_file(general["subreddit_file"])
+        not_found, found = util.known_subs_for_symbols(known_coin_name_array, symbols)
         cap = CoinCap()
         coins = cap.get_coin_aliases(1000)
         coin_name_array = []
+        # try finding remaining coins
         for coin in coins:
-            if coin[-1] in symbols:
+            if coin[-1] in not_found:
                 coin_name_array.append(coin)
         if(len(symbols) != len(coin_name_array)):
             log.info("No coin data for {} coins.".format(len(symbols) - len(coin_name_array)))
@@ -207,8 +213,6 @@ class RedditStats(object):
         for coin_tuple in coin_name_array:
             coin_tuple.append("".join(x for x in coin_tuple[0] if x.isalnum()))
         subreddit_list = self.find_subreddits([name[-1] for name in coin_name_array])
-        print(len(subreddit_list))
-        print(len(coin_name_array))
         for i,coin in enumerate(coin_name_array):
             coin[-1] = subreddit_list[i]
-        return coin_name_array
+        return coin_name_array, found

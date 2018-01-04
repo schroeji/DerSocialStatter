@@ -9,7 +9,8 @@ import util
 
 SCALE_SPENDINGS = False
 K = 4
-STEP_HOURS = 23
+STEP_HOURS = 33
+GROWTH_HOURS = 12
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 
@@ -64,7 +65,7 @@ def largest_xhr_policy(self, time, step_nr):
     Buy those k coins which had the biggest percentage gain in the last xhrs.
     Sell all coins which are no top gainers and reinvest the profits.
     """
-    start_time = time - datetime.timedelta(hours=STEP_HOURS)
+    start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
     if step_nr == 0:
         self.all_subs = self.market.portfolio.keys()
     else:
@@ -92,14 +93,13 @@ def largest_xhr_policy(self, time, step_nr):
 
 def subreddit_growth_policy(self, time, step_nr):
     """
-    Buy those K coins with the biggest subbreddit growth in the last STEP_HOURS hours.
+    Buy those K coins with the biggest subbreddit growth in the last GROWTH_HOURS hours.
     """
     if step_nr == 0:
         self.all_subs = self.market.portfolio.keys()
     else:
         self.market.sell_all()
-    xhrs =  datetime.timedelta(hours=STEP_HOURS)
-    start_time = time - xhrs
+    start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
     end_time = time
     growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
     growths.reverse()
@@ -121,7 +121,7 @@ def subreddit_growth_policy(self, time, step_nr):
             if spend == 0:
                 continue
         self.market.buy(growths[i][0], spend)
-    return xhrs
+    return datetime.timedelta(hours=STEP_HOURS)
 
 def hybrid_policy(self, time, step_nr):
     """
@@ -131,8 +131,7 @@ def hybrid_policy(self, time, step_nr):
         self.all_subs = self.market.portfolio.keys()
     else:
         self.market.sell_all()
-    xhrs =  datetime.timedelta(hours=STEP_HOURS)
-    start_time = time - xhrs
+    start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
     end_time = time
     growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
     # convert to percentages
@@ -163,4 +162,4 @@ def hybrid_policy(self, time, step_nr):
             if spend == 0:
                 continue
         self.market.buy(combined_growth[i][0], spend)
-    return xhrs
+    return datetime.timedelta(hours=STEP_HOURS)
