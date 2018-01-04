@@ -6,7 +6,7 @@ adtoken,adToken,ADT,adtoken
 adx-net,adxnet,adex,ADX,adex
 aeternity,Aeternity,AE,aeternity
 aeon,Aeon,AEON,aeon
-agoras-tokens,Agoras Tokens,AGRS,agoras
+agorastokens,Agoras Tokens,AGRS,agoras
 aion,aion,AION,aionnetwork
 amber,ambrosus,AMB,ambrosus
 synereo,Synereo,AMP,synereo
@@ -20,12 +20,12 @@ airswap,AirSwap,AST,airswap
 atbcoin,ATBCoin,ATB,atbcoin
 auroracoin,Auroracoin,AUR,auroracoin
 aventus,Aventus,AVT,aventus
-basic-attention-token,Basic Attention Token,BAT,basicattentiontoken
+basicattentiontoken,Basic Attention Token,BAT,basicattentiontoken
 bitbay,BitBay,BAY,bitbay
 boolberry,Boolberry,BBR,boolberry
 bitconnect,BitConnect,BCC,bitconnect
-bitcoin-cash,Bitcoin Cash,BCH,bitcoincash
-bytecoin-bcn,Bytecoin,BCN,bytecoinbcn
+bitcoincash,Bitcoin Cash,BCH,bitcoincash
+bytecoinbcn,Bytecoin,BCN,bytecoinbcn
 blockmason,BlockMason Credit Protocol,BCPT,blockmason
 bitcrystals,Bitcrystals,BCY,bitcrystals
 belacoin,Bela,BELA,belacoin
@@ -53,7 +53,7 @@ clams,Clams,CLAM,clamcoin
 cloakcoin,CloakCoin,CLOAK,cloak_coin
 cybermiles,CyberMiles,CMT,cybermiles
 cindicator,Cindicator,CND,cindicator
-circuits-of-value,Circuits of Value,COVAL,coval
+circuitsofvalue,Circuits of Value,COVAL,coval
 creditbit,Creditbit,CRB,creditbit
 crown,Crown,CRW,crown
 centra,Centra,CTR,centratech
@@ -65,7 +65,7 @@ decred,Decred,DCR,decred
 digibyte,DigiByte,DGB,digibyte
 digixdao,DigixDAO,DGD,digix
 etheroll,Etheroll,DICE,etheroll
-agrello-delta,agrellodelta,agrello,DLT,agrello
+agrellodelta,agrellodelta,agrello,DLT,agrello
 diamond,Diamond,DMD,dmd
 encrypgen,EncrypGen,DNA,encrypgen
 district0x,district0x,DNT,district0x
@@ -75,7 +75,7 @@ domraider,DomRaider,DRT,domraider
 eboostcoin,eBoost,EBST,eboost
 edgeless,Edgeless,EDG,edgeless
 eidoo,Eidoo,EDO,eidoo
-e-gulden,e-Gulden,EFL,egulden
+egulden,e-Gulden,EFL,egulden
 evergreencoin,EverGreenCoin,EGC,evergreencoin
 aelf,aelf,ELF,aelftrader
 emercoin,Emercoin,EMC,emercoin
@@ -125,7 +125,7 @@ korecoin,Kore,KORE,newkorecoin
 librarycredit,library-credit,lbry,LBC,lbry
 ethlend,ETHLend,LEND,ethlend
 leocoin,LEOcoin,LEO,leocoin
-legends-room,Legends Room,LGD,legendslgd
+legendsroom,Legends Room,LGD,legendslgd
 chainlink,ChainLink,LINK,linktrader
 lykke,Lykke,LKK,lykke
 lomocoin,LoMoCoin,LMC,lomocoin
@@ -179,7 +179,7 @@ primas,Primas,PST,primas
 pesetacoin,Pesetacoin,PTC,officialpesetacoin
 patientory,Patientory,PTOY,ptoy
 qash,QASH,QASH,qash
-quantum-resistant-ledger,Quantum Resistant Ledger,QRL,qrl
+quantumresistantledger,Quantum Resistant Ledger,QRL,qrl
 quantstamp,Quantstamp,QSP,quantstamp
 qtum,Qtum,QTUM,qtum
 radium,Radium,RADS,radiumcrypto

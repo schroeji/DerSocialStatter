@@ -34,7 +34,7 @@ class CoinCap(object):
         """
         get the price data for all coins in coin_name_array
         """
-        json_url = "{}?limit={}".format(self.url, 500)
+        json_url = "{}?limit={}".format(self.url, 1000)
         resp = requests.get(url=json_url)
         data = json.loads(resp.text)
         d = {}
@@ -55,5 +55,5 @@ class CoinCap(object):
                     matched = True
                     break
             if not matched:
-                log.warining("No match for {}".format(coin[0]))
+                log.warning("No match for {}".format(coin[0]))
         return d
