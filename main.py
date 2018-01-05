@@ -137,7 +137,8 @@ def main():
         util.write_subs_to_file("found.csv", found)
 
     if args.auto_trade:
-        auto = AutoTrader.AutoTrader("Poloniex")
+        # auto = AutoTrader.AutoTrader("Poloniex")
+        auto = AutoTrader.AutoTrader("Bittrex")
         auto.run()
 
 if __name__ == "__main__":

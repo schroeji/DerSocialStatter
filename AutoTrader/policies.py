@@ -35,7 +35,6 @@ def __sell_and_spendings__(adapter, growths):
     else:
         for coin in buy_coins:
             spend[coin] = net_worth / K
-    print(spend)
     # prevent selling and rebuying the same coin
     sell = list(owned_coins.keys())
     for coin, amount in spend.items():
@@ -43,7 +42,10 @@ def __sell_and_spendings__(adapter, growths):
             log.info("Already owning %sBTC of %s" % (owned_coins[coin], coin))
             log.info("Prevented sell and rebuy")
             sell.remove(coin)
-            spend[coin] = amount - owned_coins[coin]
+            if amount > owned_coins[coin]:
+                spend[coin] = amount - owned_coins[coin]
+            else:
+                spend[coin] = 0
             available = owned_coins[coin]
             # redistribute additionally availabe equally btc
             for redis_coin in buy_coins:
@@ -52,14 +54,18 @@ def __sell_and_spendings__(adapter, growths):
                 else:
                     spend[redis_coin] += 1./(K-1) * available
     # remove sells when total would be under threshold
-    for coin in sell:
+    for coin, _ in owned_coins.items():
         if owned_coins[coin] < adapter.get_min_spend():
-            owned_coins.pop(coin, None)
+            sell.remove(coin)
+    # remove buys when total would be under threshold
+    for coin in list(spend.keys()):
+        if spend[coin] < adapter.get_min_spend():
+            spend.pop(coin, None)
     return (sell, spend)
 
 
 def subreddit_growth_policy(adapter):
-    trade_hours = 23
+    trade_hours = 22
     growth_hours = 23
     now = datetime.datetime.utcnow()
     last_trade = adapter.get_last_trade_date()
@@ -71,8 +77,8 @@ def subreddit_growth_policy(adapter):
     growths = query.average_growth(db, subs, start_time, now, sort=True)
     growths.reverse()
     sell, spend = __sell_and_spendings__(adapter, growths[:K])
-    # print(sell)
-    # print(spend)
+    log.info("Selling: %s" % (sell))
+    log.info("Buying: %s" % (spend.keys()))
     for coin in sell:
         adapter.sell_all(coin)
     for coin, amount in spend.items():

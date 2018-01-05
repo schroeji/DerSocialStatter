@@ -45,6 +45,12 @@ def get_poloniex_auth():
         auth = json.load(f)
     return auth['poloniex']
 
+def get_bittrex_auth():
+    with open(general["auth_file"]) as f:
+        auth = json.load(f)
+    return auth['bittrex']
+
+
 def write_subs_to_file(path, subreddit_list):
     export_to_csv(path, subreddit_list)
 

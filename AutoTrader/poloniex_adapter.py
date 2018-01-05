@@ -1,5 +1,6 @@
 import poloniex
 from poloniex import PoloniexError
+from AutoTrader.adapter import Market_Adapter
 import time
 import datetime
 
@@ -9,21 +10,17 @@ import settings
 FEE = 0.0025
 log = util.setup_logger(__name__)
 
-class Poloniex_Adapter:
+class Poloniex_Adapter(Market_Adapter):
 
     def __init__(self):
         auth = util.get_poloniex_auth()
-        self.polo = poloniex.Poloniex(**auth)
+        self.client = poloniex.Poloniex(**auth)
         # timeout for buy, sell orders
         self.timeout = 90
         self.retries = 5
         self.coin_name_array = util.read_subs_from_file(settings.general["poloniex_file"])
 
     #--------- Buy Operations ---------
-    def buy_by_sub(self, sub, amount):
-        symbol = util.get_symbol_for_sub(self.coin_name_array, sub)
-        self.buy_by_symbol(symbol, amount)
-
     def buy_by_symbol(self, symbol, total):
         if self.__buy_with_BTC__(symbol, total):
             return True
@@ -33,16 +30,16 @@ class Poloniex_Adapter:
         log.warn("Reached maximum number of retries for buying %s. Giving up..." %(symbol))
         return False
 
-def __buy_with_BTC_aggressive__(self, symbol, total):
+    def __buy_with_BTC_aggressive__(self, symbol, total):
         """
         Will buy the coin using BTC for the lowest asking price.
         """
         pair = "BTC_{}".format(symbol)
-        rate = self.get_lowest_ask(pair)
+        rate = self.get_lowest_ask(symbol)
         # amount = total / ((1. + FEE) * rate)
         amount = total / rate
         try:
-            self.polo.buy(pair, rate, amount, 'fillOrKill')
+            self.client.buy(pair, rate, amount, 'fillOrKill')
         except PoloniexError as e:
             log.warn("Aggressive buy failed. Could not buy %s for %sBTC. Reason: %s" %(symbol, total, str(e)))
             return False
@@ -51,10 +48,10 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
 
     def __buy_with_BTC__(self, symbol, total):
         pair = "BTC_{}".format(symbol)
-        rate = self.get_bid_ask_mean(pair)
+        rate = self.get_bid_ask_mean(symbol)
         amount = total / ((1 + FEE) * rate)
         try:
-            order = self.polo.buy(pair, rate, amount)
+            order = self.client.buy(pair, rate, amount)
         except PoloniexError as e:
             log.warn("Could not create buy order for %s for %sBTC. Reason: %s" %(symbol, total, str(e)))
             return
@@ -62,7 +59,7 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         slept = 0
         while slept < self.timeout:
             completed = True
-            open_orders = self.polo.returnOpenOrders(pair)
+            open_orders = self.client.returnOpenOrders(pair)
             for o in open_orders:
                 if o["orderNumber"] == order_nr:
                     completed = False
@@ -74,14 +71,10 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         if completed:
             log.info("Bought %s %s at %s." %(amount, symbol, rate))
         else:
-            self.polo.cancelOrder(order_nr)
+            self.client.cancelOrder(order_nr)
         return completed
 
     #--------- Sell Operations ---------
-
-    def sell_by_sub(self, sub, amount):
-        symbol = util.get_symbol_for_sub(self.coin_name_array, sub)
-        self.sell_by_symbol(symbol, amount)
 
     def sell_by_symbol(self, symbol, amount):
         """
@@ -95,34 +88,22 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         log.warn("Reached maximum number of retries for selling %s. Giving up..." %(symbol))
         return False
 
-    def sell_all(self, symbol):
-        amount = self.get_portfolio()[symbol]
-        self.sell_by_symbol(symbol, amount)
-
-    def sell_all_coins(self):
-        portfolio = self.get_portfolio()
-        print(portfolio)
-        for coin in portfolio:
-            if coin == "BTC":
-                continue
-            self.sell_by_symbol(coin, portfolio[coin])
-
     def __sell_for_BTC_aggressive__(self, symbol, amount):
         pair = "BTC_{}".format(symbol)
-        rate = self.get_highest_bid(pair)
+        rate = self.get_highest_bid(symbol)
         try:
-            self.polo.sell(pair, rate, amount, 'fillOrKill')
+            self.client.sell(pair, rate, amount, 'fillOrKill')
         except PoloniexError as e:
             log.warn("Aggressive sell failed. Could not sell %s %s. Reason: %s" %(amount, symbol, str(e)))
             return False
-        log.info("Sold %s %s at %s. (aggrssive)" %(amount, symbol, rate))
+        log.info("Sold %s %s at %s. (aggressive)" %(amount, symbol, rate))
         return True
 
     def __sell_for_BTC__(self, symbol, amount):
         pair = "BTC_{}".format(symbol)
-        rate = self.get_bid_ask_mean(pair)
+        rate = self.get_bid_ask_mean(symbol)
         try:
-            order = self.polo.sell(pair, rate, amount)
+            order = self.client.sell(pair, rate, amount)
         except PoloniexError as e:
             log.warn("Could not create sell order for %s %s. Reason: %s" %(amount, symbol, str(e)))
             return
@@ -130,7 +111,7 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         slept = 0
         while slept < self.timeout:
             completed = True
-            open_orders = self.polo.returnOpenOrders(pair)
+            open_orders = self.client.returnOpenOrders(pair)
             for o in open_orders:
                 if o["orderNumber"] == order_nr:
                     completed = False
@@ -142,7 +123,7 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         if completed:
             log.info("Sold %s %s at %s." %(amount, symbol, rate))
         else:
-            self.polo.cancelOrder(order_nr)
+            self.client.cancelOrder(order_nr)
         return completed
 
     #--------- Get Operations ---------
@@ -155,7 +136,7 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         Returns all non-zero entries of the portfolio.
         """
         portfolio = {}
-        balances = self.polo.returnBalances()
+        balances = self.client.returnBalances()
         for coin in balances:
             if float(balances[coin]) > 0.0:
                 portfolio[coin] = float(balances[coin])
@@ -166,29 +147,32 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         Returns all non-zero entries of the portfolio with the corresponding btc values.
         """
         portfolio = {}
-        balances = self.polo.returnCompleteBalances()
+        balances = self.client.returnCompleteBalances()
         for coin in balances:
             if float(balances[coin]["btcValue"]) > 0.0:
                 portfolio[coin] = float(balances[coin]["btcValue"])
         return portfolio
 
-    def get_lowest_ask(self, pair):
+    def get_lowest_ask(self, symbol):
         """
         Returns the current lowset asking price for pair.
         """
-        return float(self.polo.returnTicker()[pair]["lowestAsk"])
+        pair = "BTC_{}".format(symbol)
+        return float(self.client.returnTicker()[pair]["lowestAsk"])
 
-    def get_highest_bid(self, pair):
+    def get_highest_bid(self, symbol):
         """
         Returns the highest bid for pair.
         """
-        return float(self.polo.returnTicker()[pair]["highestBid"])
+        pair = "BTC_{}".format(symbol)
+        return float(self.client.returnTicker()[pair]["highestBid"])
 
-    def get_bid_ask_mean(self, pair):
+    def get_bid_ask_mean(self, symbol):
         """
         Returns the mean of highest bid and lowest asking price for pair.
         """
-        ticker = self.polo.returnTicker()
+        pair = "BTC_{}".format(symbol)
+        ticker = self.client.returnTicker()
         return (float(ticker[pair]["highestBid"]) + float(ticker[pair]["lowestAsk"])) / 2.
 
     def get_last_trade_date(self):
@@ -196,18 +180,15 @@ def __buy_with_BTC_aggressive__(self, symbol, total):
         Returns the date of the last trade
         """
         last_week = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-        trades = self.polo.returnTradeHistory(start=last_week.timestamp())
+        trades = self.client.returnTradeHistory(start=last_week.timestamp())
         dates = []
         for _, trade in trades.items():
             trade_date = datetime.datetime.strptime(trade[0]["date"], '%Y-%m-%d %H:%M:%S')
             dates.append(trade_date)
         return max(dates)
 
-    def get_coins(self):
-        return self.coin_name_array
-
     def get_net_worth(self):
-        balances = self.polo.returnCompleteBalances()
+        balances = self.client.returnCompleteBalances()
         return sum([float(b["btcValue"]) for b in balances.values()])
 
     def get_min_spend(self):
