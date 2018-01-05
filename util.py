@@ -50,6 +50,10 @@ def get_bittrex_auth():
         auth = json.load(f)
     return auth['bittrex']
 
+def get_binance_auth():
+    with open(general["auth_file"]) as f:
+        auth = json.load(f)
+    return auth['binance']
 
 def write_subs_to_file(path, subreddit_list):
     export_to_csv(path, subreddit_list)

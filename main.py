@@ -138,7 +138,8 @@ def main():
 
     if args.auto_trade:
         # auto = AutoTrader.AutoTrader("Poloniex")
-        auto = AutoTrader.AutoTrader("Bittrex")
+        # auto = AutoTrader.AutoTrader("Bittrex")
+        auto = AutoTrader.AutoTrader("Binance")
         auto.run()
 
 if __name__ == "__main__":
