@@ -176,38 +176,48 @@ def subreddit_growth_policy_with_stagnation_detection(self, time, step_nr):
     if step_nr == 0:
         self.all_subs = self.market.portfolio.keys()
         owned = 0
+        self.bought_time = {}
     else:
         owned_coins = self.market.owned_coins().keys()
         for coin in owned_coins:
+            # hold coins for at least STEP_HOURS hours
+            if self.bought_time[coin] > time - datetime.timedelta(hours=STEP_HOURS):
+                continue
+            # if held coin long enough and it's stagnating sell it
             if __stagnation_detection__(self.db, time, coin):
                 self.market.sell(coin)
+                self.bought_time.pop(coin, None)
         owned = len(self.market.owned_coins())
+
     rebuy = K - owned
-    if rebuy == 0:
-        return datetime.timedelta(hours=1)
+    if rebuy == 0:               # buy no new coins
+        earliest_sell = min(self.bought_time.items()) + datetime.timedelta(hours=STEP_HOURS)
+        return earliest_sell - time
     start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
     end_time = time
     growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
     growths.reverse()
 
     if SCALE_SPENDINGS:
-        if USE_SMOOTHING and growths[K-1][1] < 0:
-            for i in range(K):
+        if USE_SMOOTHING and growths[rebuy-1][1] < 0:
+            for i in range(rebuy):
                 # => smallest gain will be 1 and the rest is adjusted accordingly
-                growths[i][1] += -growths[K-1][1] + 1
-        growth_sum = sum([growths[i][1] for i in range(K)])
+                growths[i][1] += -growths[rebuy-1][1] + 1
+        growth_sum = sum([growths[i][1] for i in range(rebuy)])
         funds = self.funds
     else:
         # split equally
-        spend = int((self.funds / K) * 100) / 100.
-    for i in range(K):
+        spend = int((self.funds / rebuy) * 100) / 100.
+    for i in range(rebuy):
         # scale spend money realtive with sub growth
         if SCALE_SPENDINGS:
             spend = int((growths[i][1]/growth_sum) * funds * 100) / 100.
             if spend == 0:
                 continue
         self.market.buy(growths[i][0], spend)
-    return datetime.timedelta(hours=1)
+        self.bought_date[growths[i][0]] = time
+    earliest_sell = min(self.bought_time.items()) + datetime.timedelta(hours=STEP_HOURS)
+    return earliest_sell - time
 
 def __stagnation_detection__(db, time, subreddit):
     start_time = time - datetime.timedelta(hours=STAGNATION_TIME)
