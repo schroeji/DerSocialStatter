@@ -37,6 +37,7 @@ class Poloniex_Adapter(Market_Adapter):
         """
         pair = "BTC_{}".format(symbol)
         rate = self.get_lowest_ask(symbol)
+        total = min(total, self.get_btc())
         amount = total / ((1. + FEE) * rate)
         # amount = total / rate
         try:
@@ -50,6 +51,7 @@ class Poloniex_Adapter(Market_Adapter):
     def __buy_with_BTC__(self, symbol, total):
         pair = "BTC_{}".format(symbol)
         rate = self.get_bid_ask_mean(symbol)
+        total = min(total, self.get_btc())
         amount = total / ((1 + FEE) * rate)
         try:
             order = self.client.buy(pair, rate, amount)
