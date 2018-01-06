@@ -1,5 +1,6 @@
-from AutoTrader import policies, poloniex_adapter, bittrex_adapter, binance_adapter
 import util
+from AutoTrader import (binance_adapter, bittrex_adapter, policies,
+                        poloniex_adapter)
 
 log = util.setup_logger(__name__)
 
@@ -17,4 +18,4 @@ class AutoTrader():
     def run(self):
         print(self.adapter.get_portfolio())
         print(self.adapter.get_portfolio_btc_value())
-        # policies.subreddit_growth_policy(self.adapter)
+        policies.subreddit_growth_policy(self.adapter)
