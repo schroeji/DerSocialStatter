@@ -100,7 +100,7 @@ class DatabaseConnection(object):
 
     def get_all_price_data_in_interval(self, start, end):
         """
-        Returns all data points for all subreddits in the given interval
+        Returns all data points for all subreddits in the given interval (newest first).
         """
         querystr = "SELECT subreddit, price, percent_change_1h, percent_change_24h \
                 FROM price WHERE time > %s AND time < %s ORDER BY time DESC"

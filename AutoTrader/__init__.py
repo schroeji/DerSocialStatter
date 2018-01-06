@@ -16,6 +16,8 @@ class AutoTrader():
             log.warn("Invalid market {}.".format(market))
 
     def run(self):
-        print(self.adapter.get_portfolio())
-        print(self.adapter.get_portfolio_btc_value())
+        log.info("Owned coins:")
+        log.info(self.adapter.get_portfolio())
+        log.info("Owned coins btc value:")
+        log.info(self.adapter.get_portfolio_btc_value())
         policies.subreddit_growth_policy(self.adapter)
