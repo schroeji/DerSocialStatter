@@ -1,11 +1,12 @@
+import datetime
+import time
+
 import poloniex
 from poloniex import PoloniexError
-from AutoTrader.adapter import Market_Adapter
-import time
-import datetime
 
-import util
 import settings
+import util
+from AutoTrader.adapter import Market_Adapter
 
 FEE = 0.0025
 log = util.setup_logger(__name__)
@@ -36,8 +37,8 @@ class Poloniex_Adapter(Market_Adapter):
         """
         pair = "BTC_{}".format(symbol)
         rate = self.get_lowest_ask(symbol)
-        # amount = total / ((1. + FEE) * rate)
-        amount = total / rate
+        amount = total / ((1. + FEE) * rate)
+        # amount = total / rate
         try:
             self.client.buy(pair, rate, amount, 'fillOrKill')
         except PoloniexError as e:
