@@ -31,7 +31,7 @@ class Simulator(object):
         self.networth_history.append(self.trader.funds + port_val)
         self.date_history.append(self.time)
         if self.verbose:
-            log.info("Time: {}".format(self.time))
+            log.info("------Time: {}".format(self.time))
             log.info("Coin value: {:8.2f}".format(port_val))
             log.info("funds: {:13.2f}".format(self.trader.funds))
             log.info("Sum: {:15.2f}".format(self.trader.funds + port_val))
@@ -59,7 +59,7 @@ def average_percentage_gain(networth_history):
     print(gains)
     return np.mean(gains)
 
-def simulate(policy_list, start_time):
+def simulate(policy_list, start_time, end_time=datetime.datetime.utcnow()):
     """
     Function which sets up and runs the simulator.
     """
@@ -71,11 +71,11 @@ def simulate(policy_list, start_time):
         start_funds = 100.
         # market = Market(db)
         # market = Market.create_binance_market(db)
-        # market = Market.create_poloniex_market(db)
-        market = Market.create_bittrex_market(db)
+        market = Market.create_poloniex_market(db)
+        # market = Market.create_bittrex_market(db)
         trader = Trader(db, start_funds, market)
         trader.policy = policy
-        sim = Simulator(trader, start_time, market=market)
+        sim = Simulator(trader, start_time, end_time=end_time, market=market)
         market.setSimulator(sim)
         market.setTrader(trader)
         sim.run()

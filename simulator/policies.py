@@ -9,7 +9,7 @@ import util
 
 SCALE_SPENDINGS = False
 K = 4
-STEP_HOURS = 24
+STEP_HOURS = 23
 GROWTH_HOURS = 12
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
@@ -191,8 +191,9 @@ def subreddit_growth_policy_with_stagnation_detection(self, time, step_nr):
 
     rebuy = K - owned
     if rebuy == 0:               # buy no new coins
-        earliest_sell = min(self.bought_time.items()) + datetime.timedelta(hours=STEP_HOURS)
-        return earliest_sell - time
+        earliest_sell = min(self.bought_time.values()) + datetime.timedelta(hours=STEP_HOURS) - time
+        earliest_sell = max(earliest_sell, datetime.timedelta(hours=2))
+        return earliest_sell
     start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
     end_time = time
     growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
@@ -214,13 +215,20 @@ def subreddit_growth_policy_with_stagnation_detection(self, time, step_nr):
             spend = int((growths[i][1]/growth_sum) * funds * 100) / 100.
             if spend == 0:
                 continue
+        while growths[i][0] in self.market.owned_coins().keys():
+            growths.pop(i)
+
         self.market.buy(growths[i][0], spend)
-        self.bought_date[growths[i][0]] = time
-    earliest_sell = min(self.bought_time.items()) + datetime.timedelta(hours=STEP_HOURS)
-    return earliest_sell - time
+        self.bought_time[growths[i][0]] = time
+    # earliest time the next coin can be sold
+    earliest_sell = min(self.bought_time.values()) + datetime.timedelta(hours=STEP_HOURS) - time
+    # earliest_sell maybe = 0
+    # wait at least two hours
+    earliest_sell = max(earliest_sell, datetime.timedelta(hours=2))
+    return earliest_sell
 
 def __stagnation_detection__(db, time, subreddit):
-    start_time = time - datetime.timedelta(hours=STAGNATION_TIME)
+    start_time = time - datetime.timedelta(hours=STAGNATION_HOURS)
     price_data = db.get_all_price_data_in_interval(start_time, time)
     price_now = 0
     price_xhrs_ago = 0
@@ -232,8 +240,6 @@ def __stagnation_detection__(db, time, subreddit):
         if line[0] == subreddit:
             price_xhrs_ago = line[1]
             break
-    print(price_xhrs_ago)
-    print(price_now)
     if price_now == 0 or price_xhrs_ago == 0:
         log.warn("No price data for %s. Assuming no stagnation." % (subreddit))
         return False
