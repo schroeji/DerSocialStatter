@@ -20,8 +20,8 @@ def __sell_and_spendings__(adapter, growths):
     assert len(growths) == K
     net_worth = adapter.get_net_worth()
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:K]]
-    owned_coins = adapter.get_portfolio_btc_value()
-    owned_coins.pop("BTC", None)
+    owned_coins = adapter.get_portfolio_funds_value()
+    owned_coins.pop(adapter.mode, None)
     spend = {}
     if SCALE_SPENDINGS:
         if growths[K-1][1] < 0:
@@ -39,7 +39,7 @@ def __sell_and_spendings__(adapter, growths):
     sell = list(owned_coins.keys())
     for coin, amount in spend.items():
         if coin in sell:
-            log.info("Already owning %sBTC of %s" % (owned_coins[coin], coin))
+            log.info("Already owning %s%s of %s" % (owned_coins[coin], adapter.mode, coin))
             log.info("Prevented sell and rebuy")
             sell.remove(coin)
             if amount > owned_coins[coin]:
@@ -47,7 +47,7 @@ def __sell_and_spendings__(adapter, growths):
             else:
                 spend[coin] = 0
             available = owned_coins[coin]
-            # redistribute additionally availabe equally btc
+            # redistribute additionally available equally funds
             for redis_coin in buy_coins:
                 if redis_coin == coin:
                     continue

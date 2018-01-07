@@ -1,7 +1,12 @@
 import util
+
+
 class Market_Adapter(object):
 
-    def __init__(self):
+    def __init__(self, mode):
+        if not mode in ["ETH", "BTC"]:
+            raise ValueError("Invalid mode")
+        self.mode = mode
         self.coin_name_array = []
 
     #--------- Buy Operations ---------
@@ -33,13 +38,13 @@ class Market_Adapter(object):
     def sell_all_coins(self):
         portfolio = self.get_portfolio()
         for coin in portfolio:
-            if coin == "BTC":
+            if coin == mode:
                 continue
             self.sell_by_symbol(coin, portfolio[coin])
 
     #--------- Get Operations ---------
 
-    def get_btc(self):
+    def get_funds(self):
         pass
 
     def get_portfolio(self):
@@ -48,9 +53,9 @@ class Market_Adapter(object):
         """
         pass
 
-    def get_portfolio_btc_value(self):
+    def get_portfolio_funds_value(self):
         """
-        Returns all non-zero entries of the portfolio with the corresponding btc values.
+        Returns all non-zero entries of the portfolio with the corresponding values in self.mode.
         """
         pass
 
@@ -83,7 +88,7 @@ class Market_Adapter(object):
 
     def get_net_worth(self):
         """
-        SUm of the btc value of all coins.
+        Sum of the self.mode value of all coins.
         """
         pass
 

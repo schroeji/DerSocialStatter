@@ -18,6 +18,8 @@ class AutoTrader():
     def run(self):
         log.info("Owned coins:")
         log.info(self.adapter.get_portfolio())
-        log.info("Owned coins btc value:")
-        log.info(self.adapter.get_portfolio_btc_value())
-        policies.subreddit_growth_policy(self.adapter)
+        log.info("Owned coins %s value:" % (self.adapter.mode))
+        log.info(self.adapter.get_portfolio_funds_value())
+        self.adapter.buy_by_symbol("EOS", 0.001)
+
+        # policies.subreddit_growth_policy(self.adapter)

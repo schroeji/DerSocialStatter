@@ -13,7 +13,8 @@ log = util.setup_logger(__name__)
 
 class Poloniex_Adapter(Market_Adapter):
 
-    def __init__(self):
+    def __init__(self, mode="BTC"):
+        super(self, mode)
         auth = util.get_poloniex_auth()
         self.client = poloniex.Poloniex(**auth)
         # timeout for buy, sell orders
@@ -23,13 +24,14 @@ class Poloniex_Adapter(Market_Adapter):
 
     #--------- Buy Operations ---------
     def buy_by_symbol(self, symbol, total):
-        if self.__buy_with_BTC__(symbol, total):
-            return True
-        for _ in range(self.retries):
-            if self.__buy_with_BTC_aggressive__(symbol, total):
+        if mode == "BTC":
+            if self.__buy_with_BTC__(symbol, total):
                 return True
-        log.warn("Reached maximum number of retries for buying %s. Giving up..." %(symbol))
-        return False
+            for _ in range(self.retries):
+                if self.__buy_with_BTC_aggressive__(symbol, total):
+                    return True
+            log.warn("Reached maximum number of retries for buying %s. Giving up..." %(symbol))
+            return False
 
     def __buy_with_BTC_aggressive__(self, symbol, total):
         """
@@ -83,13 +85,14 @@ class Poloniex_Adapter(Market_Adapter):
         """
         Sells the specified coin.
         """
-        if self.__sell_for_BTC__(symbol, amount):
-            return True
-        for _ in range(self.retries):
-            if self.__sell_for_BTC_aggressive__(symbol, amount):
+        if (self.mode == "BTC"):
+            if self.__sell_for_BTC__(symbol, amount):
                 return True
-        log.warn("Reached maximum number of retries for selling %s. Giving up..." %(symbol))
-        return False
+            for _ in range(self.retries):
+                if self.__sell_for_BTC_aggressive__(symbol, amount):
+                    return True
+            log.warn("Reached maximum number of retries for selling %s. Giving up..." %(symbol))
+            return False
 
     def __sell_for_BTC_aggressive__(self, symbol, amount):
         pair = "BTC_{}".format(symbol)
@@ -131,8 +134,8 @@ class Poloniex_Adapter(Market_Adapter):
 
     #--------- Get Operations ---------
 
-    def get_btc(self):
-        return self.get_portfolio()["BTC"]
+    def get_fund(self):
+        return self.get_portfolio()[mode]
 
     def get_portfolio(self):
         """
@@ -145,7 +148,11 @@ class Poloniex_Adapter(Market_Adapter):
                 portfolio[coin] = float(balances[coin])
         return portfolio
 
-    def get_portfolio_btc_value(self):
+    def get_portfolio_funds_value(self):
+        if self.mode == "BTC":
+            return self.__get_portfolio_btc_value__()
+
+    def __get_portfolio_btc_value__(self):
         """
         Returns all non-zero entries of the portfolio with the corresponding btc values.
         """
@@ -160,21 +167,21 @@ class Poloniex_Adapter(Market_Adapter):
         """
         Returns the current lowset asking price for pair.
         """
-        pair = "BTC_{}".format(symbol)
+        pair = "{}_{}".format(self.mode, symbol)
         return float(self.client.returnTicker()[pair]["lowestAsk"])
 
     def get_highest_bid(self, symbol):
         """
         Returns the highest bid for pair.
         """
-        pair = "BTC_{}".format(symbol)
+        pair = "{}_{}".format(self.mode, symbol)
         return float(self.client.returnTicker()[pair]["highestBid"])
 
     def get_bid_ask_mean(self, symbol):
         """
         Returns the mean of highest bid and lowest asking price for pair.
         """
-        pair = "BTC_{}".format(symbol)
+        pair = "{}_{}".format(self.mode, symbol)
         ticker = self.client.returnTicker()
         return (float(ticker[pair]["highestBid"]) + float(ticker[pair]["lowestAsk"])) / 2.
 
@@ -191,6 +198,10 @@ class Poloniex_Adapter(Market_Adapter):
         return max(dates)
 
     def get_net_worth(self):
+        if mode == "BTC":
+            self.__get_net_worth_btc__()
+
+    def __get_net_worth_btc__(self):
         balances = self.client.returnCompleteBalances()
         return sum([float(b["btcValue"]) for b in balances.values()])
 
