@@ -70,8 +70,8 @@ def simulate(policy_list, start_time, end_time=datetime.datetime.utcnow()):
         log.info("------ {} ------".format(policy.__name__))
         start_funds = 100.
         # market = Market(db)
-        # market = Market.create_binance_market(db)
-        market = Market.create_poloniex_market(db)
+        market = Market.create_binance_market(db)
+        # market = Market.create_poloniex_market(db)
         # market = Market.create_bittrex_market(db)
         trader = Trader(db, start_funds, market)
         trader.policy = policy

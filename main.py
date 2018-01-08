@@ -88,8 +88,8 @@ def main():
                         help="Run simulation.")
     parser.add_argument("--find_by_symbols", default=False, action='store_true',
                         help="Find coins and subreddits using 'symbols.csv'.")
-    parser.add_argument("--auto_trade", default=False, action='store_true',
-                        help="Run auto trader.")
+    parser.add_argument("--auto_trade", type=str, default="",
+                        help="Run auto trader for specified exchange.")
     args = parser.parse_args()
     # -----------------------------------
 
@@ -137,10 +137,8 @@ def main():
         util.write_subs_to_file("guesses.csv", guesses)
         util.write_subs_to_file("found.csv", found)
 
-    if args.auto_trade:
-        # auto = AutoTrader.AutoTrader("Poloniex")
-        # auto = AutoTrader.AutoTrader("Bittrex")
-        auto = AutoTrader.AutoTrader("Binance")
+    if args.auto_trade != "":
+        auto = AutoTrader.AutoTrader(args.auto_trade)
         auto.run()
 
 if __name__ == "__main__":

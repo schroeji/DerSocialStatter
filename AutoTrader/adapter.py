@@ -59,27 +59,33 @@ class Market_Adapter(object):
         """
         pass
 
-    def get_lowest_ask(self, pair):
+    def get_lowest_ask(self, symbol):
         """
-        Returns the current lowset asking price for pair.
-        """
-        pass
-
-    def get_highest_bid(self, pair):
-        """
-        Returns the highest bid for pair.
+        Returns the current lowset asking price for symbol.
         """
         pass
 
-    def get_bid_ask_mean(self, pair):
+    def get_highest_bid(self, symbol):
         """
-        Returns the mean of highest bid and lowest asking price for pair.
+        Returns the highest bid for symbol.
+        """
+        pass
+
+    def get_bid_ask_mean(self, symbol):
+        """
+        Returns the mean of highest bid and lowest asking price for symbol.
         """
         pass
 
     def get_last_trade_date(self):
         """
-        Returns the date of the last trade
+        Returns the datetime of the last trade.
+        """
+        pass
+
+    def get_last_buy_date(self, symbol):
+        """
+        Returns the datetime of the last buy of symbol.
         """
         pass
 
@@ -97,3 +103,9 @@ class Market_Adapter(object):
         Minimum amount needed to spend on this exchange.
         """
         return 0
+
+    def can_sell(self, symbol):
+        """
+        Can symbol be sold or are there any market restrictions (i.e. min value).
+        """
+        return True

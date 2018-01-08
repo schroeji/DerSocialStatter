@@ -14,7 +14,7 @@ log = util.setup_logger(__name__)
 class Poloniex_Adapter(Market_Adapter):
 
     def __init__(self, mode="BTC"):
-        super(self, mode)
+        Market_Adapter.__init__(self, mode)
         auth = util.get_poloniex_auth()
         self.client = poloniex.Poloniex(**auth)
         # timeout for buy, sell orders
@@ -24,7 +24,7 @@ class Poloniex_Adapter(Market_Adapter):
 
     #--------- Buy Operations ---------
     def buy_by_symbol(self, symbol, total):
-        if mode == "BTC":
+        if self.mode == "BTC":
             if self.__buy_with_BTC__(symbol, total):
                 return True
             for _ in range(self.retries):
@@ -39,7 +39,7 @@ class Poloniex_Adapter(Market_Adapter):
         """
         pair = "BTC_{}".format(symbol)
         rate = self.get_lowest_ask(symbol)
-        total = min(total, self.get_btc())
+        total = min(total, self.get_portfolio()["BTC"])
         amount = total / ((1. + FEE) * rate)
         # amount = total / rate
         try:
@@ -53,7 +53,7 @@ class Poloniex_Adapter(Market_Adapter):
     def __buy_with_BTC__(self, symbol, total):
         pair = "BTC_{}".format(symbol)
         rate = self.get_bid_ask_mean(symbol)
-        total = min(total, self.get_btc())
+        total = min(total, self.get_portfolio()["BTC"])
         amount = total / ((1 + FEE) * rate)
         try:
             order = self.client.buy(pair, rate, amount)
@@ -134,8 +134,8 @@ class Poloniex_Adapter(Market_Adapter):
 
     #--------- Get Operations ---------
 
-    def get_fund(self):
-        return self.get_portfolio()[mode]
+    def get_funds(self):
+        return self.get_portfolio()[self.mode]
 
     def get_portfolio(self):
         """
@@ -187,7 +187,7 @@ class Poloniex_Adapter(Market_Adapter):
 
     def get_last_trade_date(self):
         """
-        Returns the date of the last trade
+        Returns the date of the last trade.
         """
         last_week = datetime.datetime.utcnow() - datetime.timedelta(days=7)
         trades = self.client.returnTradeHistory(start=last_week.timestamp())
@@ -195,6 +195,20 @@ class Poloniex_Adapter(Market_Adapter):
         for _, trade in trades.items():
             trade_date = datetime.datetime.strptime(trade[0]["date"], '%Y-%m-%d %H:%M:%S')
             dates.append(trade_date)
+        return max(dates)
+
+    def get_last_buy_date(self, symbol):
+        """
+        Returns the date of the last trade.
+        """
+        pair = "{}_{}".format(self.mode, symbol)
+        last_week = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+        trades = self.client.returnTradeHistory(currencyPair=pair,start=last_week.timestamp())
+        dates = []
+        for trade in trades:
+            if trade["type"] == "buy":
+                trade_date = datetime.datetime.strptime(trade["date"], '%Y-%m-%d %H:%M:%S')
+                dates.append(trade_date)
         return max(dates)
 
     def get_net_worth(self):
@@ -210,3 +224,6 @@ class Poloniex_Adapter(Market_Adapter):
         Minimum amount needed to spend on this exchange.
         """
         return 0.0001
+
+    def can_sell(self, symbol):
+        return self.__get_portfolio_btc_value__()[symbol] > 2* self.get_min_spend()

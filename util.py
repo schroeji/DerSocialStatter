@@ -112,6 +112,17 @@ def get_symbol_for_sub(coin_name_array, subreddit):
         if coin[-1] == subreddit:
             return coin[-2]
 
+def get_subs_for_symbol(coin_name_array, symbol):
+    found_sub = False
+    result = []
+    for coin in coin_name_array:
+        if coin[-2] == symbol:
+            if found_sub == True:
+                log.warn("Found 2 or more subreddits for %s pls resolve manually." % (symbol))
+            found_sub = True
+            result.append(coin[-1])
+    return result
+
 def known_subs_for_symbols(coin_name_array, symbols):
     """
     Finds already known subs for a list of symbols.
@@ -119,14 +130,9 @@ def known_subs_for_symbols(coin_name_array, symbols):
     not_found = []
     result = []
     for symbol in symbols:
-        found_sub = False
-        for coin in coin_name_array:
-            if coin[-2] == symbol:
-                if found_sub == True:
-                    log.warn("Found 2 or more subreddits for %s pls resolve manually." % (symbol))
-                    continue
-                found_sub = True
-                result.append(coin)
-        if found_sub == False:
+        subs = get_subs_for_symbol(coin_name_array, symbol)
+        if len(subs) >= 1:
+            result.append(subs[0])
+        else:
             not_found.append(symbol)
     return (not_found, result)

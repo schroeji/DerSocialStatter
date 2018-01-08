@@ -8,13 +8,13 @@ import settings
 import util
 
 SCALE_SPENDINGS = False
-K = 4
-STEP_HOURS = 23
-GROWTH_HOURS = 12
+K = 3
+STEP_HOURS = 22
+GROWTH_HOURS = 23
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 
-# if a coin has less than STAGNATION_THRESHOLD pirce grwoth in STAGNATION_HOURS hours
+# if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
 STAGNATION_HOURS = 3
 STAGNATION_THRESHOLD = 0.01
@@ -244,6 +244,6 @@ def __stagnation_detection__(db, time, subreddit):
         log.warn("No price data for %s. Assuming no stagnation." % (subreddit))
         return False
     price_change = (price_now - price_xhrs_ago) / price_xhrs_ago
-    if price_change < 0.01:
+    if price_change < STAGNATION_THRESHOLD:
         return True
     return False

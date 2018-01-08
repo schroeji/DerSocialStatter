@@ -3,7 +3,9 @@ import math
 
 from binance.client import Client
 from binance.enums import *
+from binance.exceptions import *
 
+import settings
 import util
 from AutoTrader.adapter import Market_Adapter
 
@@ -14,12 +16,14 @@ class Binance_Adapter(Market_Adapter):
         Market_Adapter.__init__(self, mode)
         auth = util.get_binance_auth()
         self.client = Client(**auth)
+        self.coin_name_array = util.read_subs_from_file(settings.general["binance_file"])
 
     def buy_by_symbol(self, symbol, total):
         pair = "{}{}".format(symbol, self.mode)
         price = self.get_lowest_ask(symbol)
         qty = total / price
         info = self.client.get_symbol_info(pair)
+        total = min(total, self.get_funds())
         min_total = float(info["filters"][2]["minNotional"])
         if total < min_total:
             log.warn("Could not buy %s for %s. Total too low." % (symbol, total))
@@ -27,38 +31,27 @@ class Binance_Adapter(Market_Adapter):
         step_size = float(info["filters"][1]["stepSize"])
         qty = qty - (qty % step_size)
         try:
-            # order = self.client.order_market_buy(
-                # symbol=pair,
-                # quantity=qty_str)
-            order = self.client.create_test_order(
+            order = self.client.order_market_buy(
                 symbol=pair,
-                quantity=qty,
-                side=SIDE_BUY,
-                type=ORDER_TYPE_MARKET)
+                quantity=str(qty))
         except BinanceAPIException as e:
             log.warn("Could not buy %s. Reason: %s" %(symbol, str(e)))
             return False
         return True
 
-    def sell_by_symbol(self, symbol):
+    def sell_by_symbol(self, symbol, amount):
         pair = "{}{}".format(symbol, self.mode)
-        qty = self.get_portfolio[symbol]
         info = self.client.get_symbol_info(pair)
         step_size = float(info["filters"][1]["stepSize"])
-        qty = qty - (qty % step_size)
+        qty = amount - (amount % step_size)
         minQty =  float(info["filters"][1]["minQty"])
         if qty < minQty:
             log.warn("Could not sell %s. Quantity too low." % (symbol, total))
             return False
         try:
-            # order = self.client.order_market_buy(
-                # symbol=pair,
-                # quantity=qty_str)
-            order = self.client.create_test_order(
+            order = self.client.order_market_sell(
                 symbol=pair,
-                quantity=qty,
-                side=SIDE_SELL,
-                type=ORDER_TYPE_MARKET)
+                quantity=str(qty))
         except BinanceAPIException as e:
             log.warn("Could not sell %s. Reason: %s" %(symbol, str(e)))
             return False
@@ -128,3 +121,25 @@ class Binance_Adapter(Market_Adapter):
             max_ts = max([float(trade["time"]) for trade in trades])
             latest_timestamp = max(max_ts, latest_timestamp)
         return datetime.datetime.fromtimestamp(latest_timestamp / 1000)
+
+    def get_last_buy_date(self, symbol):
+        """
+        Returns all non-zero entries of the portfolio.
+        """
+        pair = "{}{}".format(symbol, self.mode)
+        latest_timestamp = 0
+        trades = self.client.get_my_trades(symbol=pair)
+        max_ts = max([float(trade["time"]) for trade in trades if bool(trade["isBuyer"])])
+        latest_timestamp = max(max_ts, latest_timestamp)
+        return datetime.datetime.fromtimestamp(latest_timestamp / 1000)
+
+    def can_sell(self, symbol):
+        pair = "{}{}".format(symbol, self.mode)
+        filters = self.client.get_symbol_info(pair)["filters"]
+        qty = self.get_portfolio()[symbol]
+        if float(filters[1]["minQty"]) > qty:
+            return False
+        value = self.get_portfolio_funds_value()[symbol]
+        if float(filters[2]["minNotional"]) > value:
+            return False
+        return True
