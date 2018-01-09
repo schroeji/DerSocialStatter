@@ -50,9 +50,9 @@ def __sell_and_spendings__(adapter, growths):
         for symbol in list(sell):
             subs = util.get_subs_for_symbol(adapter.coin_name_array, symbol)
             assert len(subs) == 1
-            if __stagnation_detection__(subs[0]):
+            if not __stagnation_detection__(subs[0]):
                 sell.remove(symbol)
-                log.info("Not selling %s because it's value is rising." % (symbol))
+                log.info("Not selling %s because its value is rising." % (symbol))
 
     buy_count = K - non_dust_coins
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
