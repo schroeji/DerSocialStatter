@@ -2,6 +2,8 @@ import argparse
 import datetime
 import os
 
+import matplotlib.pyplot as plt
+
 import AutoTrader
 import simulator
 import util
@@ -121,15 +123,25 @@ def main():
             log.warn("Run --find_subs first.")
 
     if args.run_sim:
-        start_time = datetime.datetime.utcnow() - datetime.timedelta(15)
-        policy_list = [
-            policies.subreddit_growth_policy,
-            # policies.largest_24h_increase_policy,
-            policies.largest_xhr_policy,
-            policies.hybrid_policy,
-            policies.subreddit_growth_policy_with_stagnation_detection
-        ]
-        simulator.simulate(policy_list, start_time)
+        minute_offsets = range(60, 500, 43)
+        for minute_offset in minute_offsets:
+            end_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=minute_offset)
+            start_time = end_time - datetime.timedelta(15)
+            policy_list = [
+                policies.subreddit_growth_policy,
+                # policies.largest_24h_increase_policy,
+                policies.largest_xhr_policy,
+                policies.hybrid_policy,
+                policies.subreddit_growth_policy_with_stagnation_detection
+            ]
+            simulator.simulate(policy_list, start_time)
+        title_str = "K={}, STEP_HOURS={}, GROWTH_HOURS={}, STAGNATION_HOURS={}, STAGNATION_THRESHOLD={}"
+        title_str = title_str.format(policies.K, policies.STEP_HOURS, policies.GROWTH_HOURS,
+                         policies.STAGNATION_HOURS, policies.STAGNATION_THRESHOLD)
+
+        plt.title(title_str)
+        plt.show()
+
 
     if args.find_by_symbols:
         stat = RedditStats()

@@ -66,6 +66,13 @@ def simulate(policy_list, start_time, end_time=datetime.datetime.utcnow()):
     auth = util.get_postgres_auth()
     db = database.DatabaseConnection(**auth)
     avg_percentage_gains = {}
+    color_dict = {
+        "subreddit_growth_policy": "b",
+        "subreddit_growth_policy_with_stagnation_detection": "r",
+        "hybrid_policy": "g",
+        "largest_xhr_policy": "orange"
+    }
+    handles = []
     for policy in policy_list:
         log.info("------ {} ------".format(policy.__name__))
         start_funds = 100.
@@ -80,8 +87,7 @@ def simulate(policy_list, start_time, end_time=datetime.datetime.utcnow()):
         market.setTrader(trader)
         sim.run()
         avg_percentage_gains[policy.__name__] = average_percentage_gain(sim.networth_history)
-        plt.plot_date(sim.date_history, sim.networth_history, "-", label=policy.__name__)
-
-    plt.legend()
-    plt.show()
+        plot, = plt.plot_date(sim.date_history, sim.networth_history, "-", label=policy.__name__, color=color_dict[policy.__name__])
+        handles.append(plot)
+    plt.legend(handles=handles)
     print(avg_percentage_gains)

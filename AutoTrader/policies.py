@@ -99,7 +99,7 @@ def __stagnation_detection__(subreddit):
 
 def subreddit_growth_policy(adapter):
     trade_hours = 22
-    growth_hours = 23
+    growth_hours = 24
     now = datetime.datetime.utcnow()
     last_trade = adapter.get_last_trade_date()
     # if last_trade > now - datetime.timedelta(hours=trade_hours):
@@ -112,7 +112,7 @@ def subreddit_growth_policy(adapter):
     sell, spend = __sell_and_spendings__(adapter, growths[:K])
     log.info("Selling: %s" % (sell))
     log.info("Buying: %s" % (spend.keys()))
-    # for coin in sell:
-        # adapter.sell_all(coin)
-    # for coin, amount in spend.items():
-        # adapter.buy_by_symbol(coin, amount)
+    for coin in sell:
+        adapter.sell_all(coin)
+    for coin, amount in spend.items():
+        adapter.buy_by_symbol(coin, amount)
