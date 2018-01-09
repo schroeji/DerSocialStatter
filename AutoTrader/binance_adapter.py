@@ -22,13 +22,13 @@ class Binance_Adapter(Market_Adapter):
     def buy_by_symbol(self, symbol, total):
         pair = "{}{}".format(symbol, self.mode)
         price = self.get_lowest_ask(symbol)
-        qty = total / price
         info = self.client.get_symbol_info(pair)
         total = min(total, self.get_funds())
         min_total = float(info["filters"][2]["minNotional"])
         if total < min_total:
             log.warn("Could not buy %s for %s. Total too low." % (symbol, total))
             return False
+        qty = total / price
         step_size = float(info["filters"][1]["stepSize"])
         qty = qty - (qty % step_size)
         try:
@@ -38,6 +38,7 @@ class Binance_Adapter(Market_Adapter):
         except BinanceAPIException as e:
             log.warn("Could not buy %s. Reason: %s" %(symbol, str(e)))
             return False
+        log.warn("Bought %s for %s" %(symbol, total))
         return True
 
     def sell_by_symbol(self, symbol, amount):
@@ -56,6 +57,7 @@ class Binance_Adapter(Market_Adapter):
         except BinanceAPIException as e:
             log.warn("Could not sell %s. Reason: %s" %(symbol, str(e)))
             return False
+        log.warn("Sold %s %s." %(symbol, amount))
         return True
 
     def get_funds(self):
