@@ -10,6 +10,7 @@ import util
 from AutoTrader.adapter import Market_Adapter
 
 FEE = 0.0025
+log = util.setup_logger(__name__)
 
 class Binance_Adapter(Market_Adapter):
     def __init__(self, mode="ETH"):

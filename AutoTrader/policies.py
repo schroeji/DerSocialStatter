@@ -8,14 +8,15 @@ log = util.setup_logger(__name__)
 auth = util.get_postgres_auth()
 db = DatabaseConnection(**auth)
 
-K = 4
 
+K = 4
+GROWTH_HOURS = 24
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
-MIN_HOLD_HOURS = 17
+MIN_HOLD_HOURS = 23
 USE_STAGNATION_DETECTION = True
 STAGNATION_HOURS = 3
-STAGNATION_THRESHOLD = 0.01
+STAGNATION_THRESHOLD = 0.025
 NEVER_SELL = ["BNB"]
 
 def __sell_and_spendings__(adapter, growths):
@@ -98,14 +99,9 @@ def __stagnation_detection__(subreddit):
     return False
 
 def subreddit_growth_policy(adapter):
-    trade_hours = 22
-    growth_hours = 24
     now = datetime.datetime.utcnow()
     last_trade = adapter.get_last_trade_date()
-    # if last_trade > now - datetime.timedelta(hours=trade_hours):
-        # log.info("Not trading because last trade is less than %s hours old." % (trade_hours))
-        # return
-    start_time = now - datetime.timedelta(hours=growth_hours)
+    start_time = now - datetime.timedelta(hours=GROWTH_HOURS)
     subs = [coin[-1] for coin in adapter.get_coins()]
     growths = query.average_growth(db, subs, start_time, now, sort=True)
     growths.reverse()
