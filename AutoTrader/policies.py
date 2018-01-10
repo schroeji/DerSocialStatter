@@ -57,7 +57,7 @@ def __sell_and_spendings__(adapter, growths):
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
     for coin in buy_coins:
         if coin in sell:
-            if adapter.can_sell(owned_symb):
+            if adapter.can_sell(coin):
                 log.info("Already owning %s %s of %s" % (owned_coins[coin], adapter.mode, coin))
                 log.info("Prevented sell and rebuy")
                 sell.remove(owned_symb)
