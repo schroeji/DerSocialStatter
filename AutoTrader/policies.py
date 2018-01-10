@@ -8,7 +8,6 @@ log = util.setup_logger(__name__)
 auth = util.get_postgres_auth()
 db = DatabaseConnection(**auth)
 
-
 K = 4
 GROWTH_HOURS = 24
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours

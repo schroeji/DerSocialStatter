@@ -9,15 +9,15 @@ import util
 
 SCALE_SPENDINGS = False
 K = 4
-STEP_HOURS = 23
+STEP_HOURS = 13
 GROWTH_HOURS = 24
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
 
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
-STAGNATION_HOURS = 3
-STAGNATION_THRESHOLD = 0.025
+STAGNATION_HOURS = 6
+STAGNATION_THRESHOLD = 0.045
 
 def raiblocks_yolo_policy(self, time, step_nr):
     """
