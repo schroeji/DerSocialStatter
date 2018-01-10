@@ -60,7 +60,7 @@ def __sell_and_spendings__(adapter, growths):
             if adapter.can_sell(coin):
                 log.info("Already owning %s %s of %s" % (owned_coins[coin], adapter.mode, coin))
                 log.info("Prevented sell and rebuy")
-                sell.remove(owned_symb)
+                sell.remove(coin)
     sell_worth = sum([owned_coins[s] for s in sell])
     available_funds = sell_worth + adapter.get_funds()
     for coin in buy_coins:
