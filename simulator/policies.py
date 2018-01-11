@@ -9,7 +9,7 @@ import util
 
 SCALE_SPENDINGS = False
 K = 4
-STEP_HOURS = 23
+STEP_HOURS = 13
 GROWTH_HOURS = 24
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
 USE_SMOOTHING = True
@@ -17,7 +17,9 @@ USE_SMOOTHING = True
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
 STAGNATION_HOURS = 6
-STAGNATION_THRESHOLD = 0.075
+STAGNATION_THRESHOLD = 0.045
+
+DYNAMIC_TOP_NR = 40
 
 def raiblocks_yolo_policy(self, time, step_nr):
     """
@@ -227,6 +229,71 @@ def subreddit_growth_policy_with_stagnation_detection(self, time, step_nr):
     earliest_sell = max(earliest_sell, datetime.timedelta(hours=2))
     return earliest_sell
 
+
+def subreddit_growth_policy_with_dynamic_stagnation_detection(self, time, step_nr):
+    """
+    Buy those coins that experienced the biggest subreddit growth whenever one of the last coins
+    stagnated.
+    """
+    if step_nr == 0:
+        self.all_subs = self.market.portfolio.keys()
+        owned = 0
+        self.bought_time = {}
+    else:
+        owned_coins = self.market.owned_coins().keys()
+        non_stagnating = __dynamic_stagnation_detection__(self.db, time, owned_coins)
+        print(non_stagnating)
+        for coin in owned_coins:
+            # hold coins for at least STEP_HOURS hours
+            if self.bought_time[coin] > time - datetime.timedelta(hours=STEP_HOURS):
+                continue
+            # if held coin long enough and it's stagnating sell it
+            if not coin in non_stagnating:
+                self.market.sell(coin)
+                self.bought_time.pop(coin, None)
+        owned = len(self.market.owned_coins())
+
+    rebuy = K - owned
+    if rebuy == 0:               # buy no new coins
+        earliest_sell = min(self.bought_time.values()) + datetime.timedelta(hours=STEP_HOURS) - time
+        earliest_sell = max(earliest_sell, datetime.timedelta(hours=2))
+        return earliest_sell
+    start_time = time - datetime.timedelta(hours=GROWTH_HOURS)
+    end_time = time
+    growths = query.average_growth(self.db, self.all_subs, start_time, end_time)
+    growths.reverse()
+
+    if SCALE_SPENDINGS:
+        if USE_SMOOTHING and growths[rebuy-1][1] < 0:
+            for i in range(rebuy):
+                # => smallest gain will be 1 and the rest is adjusted accordingly
+                growths[i][1] += -growths[rebuy-1][1] + 1
+        growth_sum = sum([growths[i][1] for i in range(rebuy)])
+        funds = self.funds
+    else:
+        # split equally
+        spend = int((self.funds / rebuy) * 100) / 100.
+    for i in range(rebuy):
+        # scale spend money realtive with sub growth
+        if SCALE_SPENDINGS:
+            spend = int((growths[i][1]/growth_sum) * funds * 100) / 100.
+            if spend == 0:
+                continue
+        while growths[i][0] in self.market.owned_coins().keys():
+            growths.pop(i)
+
+        self.market.buy(growths[i][0], spend)
+        self.bought_time[growths[i][0]] = time
+    # earliest time the next coin can be sold
+    earliest_sell = min(self.bought_time.values()) + datetime.timedelta(hours=STEP_HOURS) - time
+    # earliest_sell maybe = 0
+    # wait at least two hours
+    earliest_sell = max(earliest_sell, datetime.timedelta(hours=2))
+    return earliest_sell
+
+
+
+# ------------------helper functions ---------------------
 def __stagnation_detection__(db, time, subreddit):
     start_time = time - datetime.timedelta(hours=STAGNATION_HOURS)
     price_data = db.get_all_price_data_in_interval(start_time, time)
@@ -247,3 +314,37 @@ def __stagnation_detection__(db, time, subreddit):
     if price_change < STAGNATION_THRESHOLD:
         return True
     return False
+
+def __dynamic_stagnation_detection__(db, time, subreddit_list):
+    """
+    For a list of subreddits returns those that are in the last top DYNAMIC_TOP_NR
+    gainers in the last STAGNATION_HOURS hours.
+    """
+    start_time = time - datetime.timedelta(hours=STAGNATION_HOURS)
+    price_data = db.get_all_price_data_in_interval(start_time, time)
+    all_subs = []
+    price_changes = []
+    for line in price_data:
+        if not line[0] in all_subs:
+            all_subs.append(line[0])
+    for subreddit in all_subs:
+        price_now = 0
+        price_xhrs_ago = 0
+        for line in price_data:
+            if line[0] == subreddit:
+                price_now = line[1]
+                break
+        for line in reversed(price_data):
+            if line[0] == subreddit:
+                price_xhrs_ago = line[1]
+                break
+        if price_now == 0 or price_xhrs_ago == 0:
+            log.warn("No price data for %s. Assuming no stagnation." % (subreddit))
+            price_change = float('inf')
+        else:
+            price_change = (price_now - price_xhrs_ago) / price_xhrs_ago
+        price_changes.append((subreddit, price_change))
+    price_changes = sorted(price_changes, key=lambda subr: subr[1])
+    price_changes.reverse()
+    top_gainers = [c[0] for c in price_changes[:DYNAMIC_TOP_NR] ]
+    return [s for s in subreddit_list if s in top_gainers]

@@ -131,8 +131,9 @@ def main():
                 policies.subreddit_growth_policy,
                 # policies.largest_24h_increase_policy,
                 policies.largest_xhr_policy,
-                policies.hybrid_policy,
-                policies.subreddit_growth_policy_with_stagnation_detection
+                # policies.hybrid_policy,
+                policies.subreddit_growth_policy_with_stagnation_detection,
+                policies.subreddit_growth_policy_with_dynamic_stagnation_detection
             ]
             simulator.simulate(policy_list, start_time)
         title_str = "K={}, STEP_HOURS={}, GROWTH_HOURS={}, STAGNATION_HOURS={}, STAGNATION_THRESHOLD={}"

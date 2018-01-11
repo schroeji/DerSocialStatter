@@ -70,7 +70,8 @@ def simulate(policy_list, start_time, end_time=datetime.datetime.utcnow()):
         "subreddit_growth_policy": "b",
         "subreddit_growth_policy_with_stagnation_detection": "r",
         "hybrid_policy": "g",
-        "largest_xhr_policy": "orange"
+        "largest_xhr_policy": "orange",
+        "subreddit_growth_policy_with_dynamic_stagnation_detection": "yellow"
     }
     handles = []
     for policy in policy_list:

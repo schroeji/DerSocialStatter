@@ -47,7 +47,7 @@ class Poloniex_Adapter(Market_Adapter):
         except PoloniexError as e:
             log.warn("Aggressive buy failed. Could not buy %s for %sBTC. Reason: %s" %(symbol, total, str(e)))
             return False
-        log.info("Bought %s %s at %s. (aggressive)" %(amount, symbol, rate))
+        log.info("Bought %s %s for %s%s. (aggressive)" %(amount, symbol, total, self.mode))
         return True
 
     def __buy_with_BTC__(self, symbol, total):
@@ -74,7 +74,7 @@ class Poloniex_Adapter(Market_Adapter):
             slept += 5
             time.sleep(5)
         if completed:
-            log.info("Bought %s %s at %s." %(amount, symbol, rate))
+            log.info("Bought %s %s for %s%s." %(amount, symbol, total, self.mode))
         else:
             self.client.cancelOrder(order_nr)
         return completed
@@ -102,7 +102,7 @@ class Poloniex_Adapter(Market_Adapter):
         except PoloniexError as e:
             log.warn("Aggressive sell failed. Could not sell %s %s. Reason: %s" %(amount, symbol, str(e)))
             return False
-        log.info("Sold %s %s at %s. (aggressive)" %(amount, symbol, rate))
+        log.info("Sold %s %s for %s%s. (aggressive)" %(amount, symbol, rate*amount, self.mode))
         return True
 
     def __sell_for_BTC__(self, symbol, amount):
@@ -127,7 +127,7 @@ class Poloniex_Adapter(Market_Adapter):
             slept += 5
             time.sleep(5)
         if completed:
-            log.info("Sold %s %s at %s." %(amount, symbol, rate))
+            log.info("Sold %s %s for %s%s." %(amount, symbol, rate*amount, self.mode))
         else:
             self.client.cancelOrder(order_nr)
         return completed
