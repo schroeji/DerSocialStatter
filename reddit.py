@@ -87,7 +87,7 @@ class RedditStats(object):
             comments_per_sec_in_1_h = float(cntone)/HOUR_IN_SECONDS
         return (comments_per_sec_in_x_h*HOUR_IN_SECONDS, comments_per_sec_in_1_h*HOUR_IN_SECONDS)
 
-    def get_mentions(self, coin_name_array, hours=None, include_submissions=False):
+    def get_mentions(self, coin_name_array, hours=None, include_submissions=True, score_scaling=True):
         """
         counts how often words from coin_name_tuple were mentioned in subreddits from subreddit list
         since start
@@ -115,9 +115,15 @@ class RedditStats(object):
                 comm_created = min(comm_created, comm.created_utc)
                 for i, regex in enumerate(regex_list):
                     if not re.search(regex, comm.body) is None:
-                        count_list[i] += 1
+                        if score_scaling:
+                            count_list[i] += max(1, comm.score*0.1)
+                        else:
+                            count_list[i] += 1
                         if int(comm.created) < int(hour_ago.timestamp()):
-                            first_hour_list[i] += 1
+                            if score_scaling:
+                                first_hour_list[i] += max(1, comm.score*0.1)
+                            else:
+                                first_hour_list[i] += 1
             # search in submissions
             if include_submissions:
                 for submission in self.reddit.subreddit(sub).new():
@@ -126,9 +132,15 @@ class RedditStats(object):
                     submission_created = min(submission_created, submission.created_utc)
                     for i, regex in enumerate(regex_list):
                         if not re.search(regex, submission.title) is None:
-                            count_list[i] += 1
+                            if score_scaling:
+                                count_list[i] += max(1, comm.score*0.1)
+                            else:
+                                count_list[i] += 1
                             if int(submission.created) < int(hour_ago.timestamp()):
-                                first_hour_list[i] += 1
+                                if score_scaling:
+                                    first_hour_list[i] += max(1, comm.score*0.1)
+                                else:
+                                    first_hour_list[i] += 1
         interval_length = self.default_end.timestamp() - min(comm_created, submission_created)
         count_list = np.array(count_list) / (interval_length / HOUR_IN_SECONDS)
         return (count_list, first_hour_list)

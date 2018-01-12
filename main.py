@@ -24,7 +24,8 @@ def collect(coin_name_array, hours=12):
     stat = RedditStats()
     auth = util.get_postgres_auth()
     db = DatabaseConnection(**auth)
-    mentions = stat.get_mentions(coin_name_array, hours=hours, include_submissions=True)
+    mentions = stat.get_mentions(coin_name_array, hours=hours,
+                                 include_submissions=True, score_scaling=True)
     log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
         subreddit = coin_tuple[-1]
