@@ -26,7 +26,7 @@ class Binance_Adapter(Market_Adapter):
         total = min(total, self.get_funds())
         min_total = float(info["filters"][2]["minNotional"])
         if total < min_total:
-            log.warn("Could not buy %s for %s. Total too low." % (symbol, total))
+            log.warn("Could not buy %s for %s%s. Total too low." % (symbol, total, self.mode))
             return False
         qty = total / price
         step_size = float(info["filters"][1]["stepSize"])
@@ -38,7 +38,7 @@ class Binance_Adapter(Market_Adapter):
         except BinanceAPIException as e:
             log.warn("Could not buy %s. Reason: %s" %(symbol, str(e)))
             return False
-        log.warn("Bought %s for %s" %(symbol, total))
+        log.info("Bought %s for %s%s" %(symbol, total, self.mode))
         return True
 
     def sell_by_symbol(self, symbol, amount):
@@ -57,7 +57,7 @@ class Binance_Adapter(Market_Adapter):
         except BinanceAPIException as e:
             log.warn("Could not sell %s. Reason: %s" %(symbol, str(e)))
             return False
-        log.warn("Sold %s %s." %(symbol, amount))
+        log.info("Sold %s %s." %(symbol, qty))
         return True
 
     def get_funds(self):

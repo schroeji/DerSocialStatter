@@ -107,7 +107,7 @@ def subreddit_growth_policy(adapter):
     growths.reverse()
     sell, spend = __sell_and_spendings__(adapter, growths[:K])
     log.info("Selling: %s" % (sell))
-    log.info("Buying: %s" % (spend.keys()))
+    log.info("Buying: %s" % (list(spend.keys())))
     for coin in sell:
         adapter.sell_all(coin)
     for coin, amount in spend.items():
