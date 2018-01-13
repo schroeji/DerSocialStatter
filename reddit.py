@@ -55,7 +55,12 @@ class RedditStats(object):
         else:
             start = self.default_end - datetime.timedelta(hours=hours)
         start_one = self.default_end - datetime.timedelta(hours=1)
-        comm = self.reddit.subreddit(subreddit).comments(limit=1024)
+        try:
+            comm = self.reddit.subreddit(subreddit).comments(limit=1024)
+        except:
+            log.warn("Could not get comment rate for subreddit: %s. It may be private or banned."
+                     % (subreddit))
+            return (0, 0)
         cntagg = 0
         cntone = 0
         exit_by_break = False
@@ -107,7 +112,12 @@ class RedditStats(object):
         comm_created = float('inf')
         submission_created = float('inf')
         for sub in GENERAL_SUBS:
-            comments = self.reddit.subreddit(sub).comments(limit=1024)
+            try:
+                comments = self.reddit.subreddit(sub).comments(limit=1024)
+            except:
+                log.warn("Could not get mentions from subreddit: %s. It may be private or banned."
+                         % (sub))
+                continue
             # search in comments
             for comm in comments:
                 if int(comm.created_utc) < int(start.timestamp()):

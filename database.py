@@ -19,7 +19,7 @@ class DatabaseConnection(object):
             self.cur = self.conn.cursor()
         except:
             log.error("Could not connect to databse!")
-            return
+            raise RuntimeError("Could not connect to databse!")
         if (not self.data_table_exists()):
             self.create_data_table()
         if (not self.price_table_exists()):
