@@ -1,5 +1,6 @@
 import datetime
 import math
+import time
 
 from binance.client import Client
 from binance.enums import *
@@ -83,7 +84,13 @@ class Binance_Adapter(Market_Adapter):
 
     def get_lowest_ask(self, symbol):
         pair = "{}{}".format(symbol, self.mode)
-        ticker = self.client.get_orderbook_ticker(symbol=pair)
+        try:
+            ticker = self.client.get_orderbook_ticker(symbol=pair)
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 1min.")
+            time.sleep(60)
+            ticker = self.client.get_orderbook_ticker(symbol=pair)
         return float(ticker["askPrice"])
 
     def get_net_worth(self):
@@ -96,7 +103,13 @@ class Binance_Adapter(Market_Adapter):
         """
         portfolio = {}
         balances = self.get_portfolio()
-        tickers = self.client.get_all_tickers()
+        try:
+            tickers = self.client.get_all_tickers()
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 1min.")
+            time.sleep(60)
+            tickers = self.client.get_all_tickers()
         for coin, amount in balances.items():
             if coin == self.mode:
                 portfolio[coin] = amount
@@ -111,7 +124,13 @@ class Binance_Adapter(Market_Adapter):
         """
         Returns all non-zero entries of the portfolio.
         """
-        balances = self.client.get_account()["balances"]
+        try:
+            balances = self.client.get_account()["balances"]
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 1min.")
+            time.sleep(60)
+            balances = self.client.get_account()["balances"]
         portfolio = {}
         for entry in balances:
             if float(entry["free"]) > 0.0:
@@ -139,14 +158,26 @@ class Binance_Adapter(Market_Adapter):
         """
         pair = "{}{}".format(symbol, self.mode)
         latest_timestamp = 0
-        trades = self.client.get_my_trades(symbol=pair)
+        try:
+            trades = self.client.get_my_trades(symbol=pair)
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 1min.")
+            time.sleep(60)
+            trades = self.client.get_my_trades(symbol=pair)
         max_ts = max([float(trade["time"]) for trade in trades if bool(trade["isBuyer"])])
         latest_timestamp = max(max_ts, latest_timestamp)
         return datetime.datetime.fromtimestamp(latest_timestamp / 1000)
 
     def can_sell(self, symbol):
         pair = "{}{}".format(symbol, self.mode)
-        filters = self.client.get_symbol_info(pair)["filters"]
+        try:
+            filters = self.client.get_symbol_info(pair)["filters"]
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 1min.")
+            time.sleep(60)
+            filters = self.client.get_symbol_info(pair)["filters"]
         qty = self.get_portfolio()[symbol]
         if float(filters[1]["minQty"]) > qty:
             return False
