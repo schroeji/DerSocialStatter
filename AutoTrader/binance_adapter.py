@@ -88,8 +88,8 @@ class Binance_Adapter(Market_Adapter):
             ticker = self.client.get_orderbook_ticker(symbol=pair)
         except BinanceAPIException  as e:
             log.info(str(e))
-            log.info("Waiting 1min.")
-            time.sleep(60)
+            log.info("Waiting 10mins.")
+            time.sleep(600)
             ticker = self.client.get_orderbook_ticker(symbol=pair)
         return float(ticker["askPrice"])
 
@@ -107,8 +107,8 @@ class Binance_Adapter(Market_Adapter):
             tickers = self.client.get_all_tickers()
         except BinanceAPIException  as e:
             log.info(str(e))
-            log.info("Waiting 1min.")
-            time.sleep(60)
+            log.info("Waiting 10mins.")
+            time.sleep(600)
             tickers = self.client.get_all_tickers()
         for coin, amount in balances.items():
             if coin == self.mode:
@@ -128,8 +128,8 @@ class Binance_Adapter(Market_Adapter):
             balances = self.client.get_account()["balances"]
         except BinanceAPIException  as e:
             log.info(str(e))
-            log.info("Waiting 1min.")
-            time.sleep(60)
+            log.info("Waiting 10mins.")
+            time.sleep(600)
             balances = self.client.get_account()["balances"]
         portfolio = {}
         for entry in balances:
@@ -162,8 +162,8 @@ class Binance_Adapter(Market_Adapter):
             trades = self.client.get_my_trades(symbol=pair)
         except BinanceAPIException  as e:
             log.info(str(e))
-            log.info("Waiting 1min.")
-            time.sleep(60)
+            log.info("Waiting 10mins.")
+            time.sleep(600)
             trades = self.client.get_my_trades(symbol=pair)
         max_ts = max([float(trade["time"]) for trade in trades if bool(trade["isBuyer"])])
         latest_timestamp = max(max_ts, latest_timestamp)
@@ -175,8 +175,8 @@ class Binance_Adapter(Market_Adapter):
             filters = self.client.get_symbol_info(pair)["filters"]
         except BinanceAPIException  as e:
             log.info(str(e))
-            log.info("Waiting 1min.")
-            time.sleep(60)
+            log.info("Waiting 10mins.")
+            time.sleep(600)
             filters = self.client.get_symbol_info(pair)["filters"]
         qty = self.get_portfolio()[symbol]
         if float(filters[1]["minQty"]) > qty:
