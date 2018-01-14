@@ -25,13 +25,17 @@ class Poloniex_Adapter(Market_Adapter):
     #--------- Buy Operations ---------
     def buy_by_symbol(self, symbol, total):
         if self.mode == "BTC":
-            if self.__buy_with_BTC__(symbol, total):
-                return True
-            for _ in range(self.retries):
-                if self.__buy_with_BTC_aggressive__(symbol, total):
+            try:
+                if self.__buy_with_BTC__(symbol, total):
                     return True
-            log.warn("Reached maximum number of retries for buying %s. Giving up..." %(symbol))
-            return False
+                for _ in range(self.retries):
+                    if self.__buy_with_BTC_aggressive__(symbol, total):
+                        return True
+                log.warn("Reached maximum number of retries for buying %s. Giving up..." %(symbol))
+                return False
+            except Exception as e:
+                log.warn("Could not buy %s. Reason: %s" %(symbol, str(e)))
+                return False
 
     def __buy_with_BTC_aggressive__(self, symbol, total):
         """
@@ -86,13 +90,17 @@ class Poloniex_Adapter(Market_Adapter):
         Sells the specified coin.
         """
         if (self.mode == "BTC"):
-            if self.__sell_for_BTC__(symbol, amount):
-                return True
-            for _ in range(self.retries):
-                if self.__sell_for_BTC_aggressive__(symbol, amount):
+            try:
+                if self.__sell_for_BTC__(symbol, amount):
                     return True
-            log.warn("Reached maximum number of retries for selling %s. Giving up..." %(symbol))
-            return False
+                for _ in range(self.retries):
+                    if self.__sell_for_BTC_aggressive__(symbol, amount):
+                        return True
+                log.warn("Reached maximum number of retries for selling %s. Giving up..." %(symbol))
+                return False
+            except Exception as e:
+                log.warn("Could not sell %s. Reason: %s" %(symbol, str(e)))
+                return False
 
     def __sell_for_BTC_aggressive__(self, symbol, amount):
         pair = "BTC_{}".format(symbol)

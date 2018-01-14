@@ -21,8 +21,12 @@ class Binance_Adapter(Market_Adapter):
 
     def buy_by_symbol(self, symbol, total):
         pair = "{}{}".format(symbol, self.mode)
-        price = self.get_lowest_ask(symbol)
-        info = self.client.get_symbol_info(pair)
+        try:
+            price = self.get_lowest_ask(symbol)
+            info = self.client.get_symbol_info(pair)
+        except Exception as e:
+            log.warn("Could not get info for %s. Reason: %s" %(symbol, str(e)))
+            return False
         total = min(total, self.get_funds())
         min_total = float(info["filters"][2]["minNotional"])
         if total < min_total:
@@ -43,8 +47,12 @@ class Binance_Adapter(Market_Adapter):
 
     def sell_by_symbol(self, symbol, amount):
         pair = "{}{}".format(symbol, self.mode)
-        info = self.client.get_symbol_info(pair)
-        step_size = float(info["filters"][1]["stepSize"])
+        try:
+            info = self.client.get_symbol_info(pair)
+            step_size = float(info["filters"][1]["stepSize"])
+        except Exception as e:
+            log.warn("Could not get info for %s. Reason: %s" %(symbol, str(e)))
+            return False
         qty = amount - (amount % step_size)
         minQty =  float(info["filters"][1]["minQty"])
         if qty < minQty:
