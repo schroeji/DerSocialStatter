@@ -128,7 +128,7 @@ class Binance_Adapter(Market_Adapter):
         """
         Returns all non-zero entries of the portfolio.
         """
-        if self.portfolio is None or self.portfolio_has_changed:
+        if not (self.portfolio is None or self.portfolio_has_changed):
             return self.portfolio
         try:
             balances = self.client.get_account()["balances"]
