@@ -19,6 +19,8 @@ class Binance_Adapter(Market_Adapter):
         auth = util.get_binance_auth()
         self.client = Client(**auth)
         self.coin_name_array = util.read_subs_from_file(settings.general["binance_file"])
+        self.portfolio = None
+        self.portfolio_has_changed = False
 
     def buy_by_symbol(self, symbol, total):
         pair = "{}{}".format(symbol, self.mode)
@@ -44,6 +46,7 @@ class Binance_Adapter(Market_Adapter):
             log.warn("Could not buy %s. Reason: %s" %(symbol, str(e)))
             return False
         log.info("Bought %s for %s%s" %(symbol, total, self.mode))
+        self.portfolio_has_changed = True
         return True
 
     def sell_by_symbol(self, symbol, amount):
@@ -67,6 +70,7 @@ class Binance_Adapter(Market_Adapter):
             log.warn("Could not sell %s. Reason: %s" %(symbol, str(e)))
             return False
         log.info("Sold %s %s." %(symbol, qty))
+        self.portfolio_has_changed = True
         return True
 
     def get_funds(self):
@@ -124,6 +128,8 @@ class Binance_Adapter(Market_Adapter):
         """
         Returns all non-zero entries of the portfolio.
         """
+        if self.portfolio is None or self.portfolio_has_changed:
+            return self.portfolio
         try:
             balances = self.client.get_account()["balances"]
         except BinanceAPIException  as e:
@@ -135,6 +141,8 @@ class Binance_Adapter(Market_Adapter):
         for entry in balances:
             if float(entry["free"]) > 0.0:
                 portfolio[entry["asset"]] = float(entry["free"])
+        self.portfolio = portfolio
+        self.portfolio_has_changed = False
         return portfolio
 
     def get_last_trade_date(self):
