@@ -18,6 +18,9 @@ STAGNATION_HOURS = 4
 STAGNATION_THRESHOLD = 0.065
 NEVER_SELL = ["BNB"]
 
+USE_DYNAMIC_STAGNATION_DETECTION = False
+DYNAMIC_TOP_NR = 20
+
 def __sell_and_spendings__(adapter, growths):
     """
     Calculates which coins to sell and how much o spend on other coins based on a dict of growths and subreddits.
@@ -46,13 +49,20 @@ def __sell_and_spendings__(adapter, growths):
             non_dust_coins += 1
     # dont sell those coins which are not stagnating
     if USE_STAGNATION_DETECTION:
-        for symbol in list(sell):
-            subs = util.get_subs_for_symbol(adapter.coin_name_array, symbol)
-            assert len(subs) == 1
-            if not __stagnation_detection__(subs[0]):
+        if USE_DYNAMIC_STAGNATION_DETECTION:
+            dont_sell = __dynamic_stagnation_detection__(db, adapter.coin_name_array, list(sell))
+            for symbol in dont_sell:
                 sell.remove(symbol)
                 log.info("Not selling %s because its value is rising." % (symbol))
                 non_dust_coins += 1
+        else:
+            for symbol in list(sell):
+                subs = util.get_subs_for_symbol(adapter.coin_name_array, symbol)
+                assert len(subs) == 1
+                if not __stagnation_detection__(subs[0]):
+                    sell.remove(symbol)
+                    log.info("Not selling %s because its value is rising." % (symbol))
+                    non_dust_coins += 1
 
     buy_count = K - non_dust_coins
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
@@ -98,6 +108,45 @@ def __stagnation_detection__(subreddit):
     if price_change < STAGNATION_THRESHOLD:
         return True
     return False
+
+def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
+    """
+    For a list of coins returns those that are in the last top DYNAMIC_TOP_NR
+    gainers in the last STAGNATION_HOURS hours.
+    """
+    now = datetime.datetime.utcnow()
+    start_time = now - datetime.timedelta(hours=STAGNATION_HOURS)
+    price_data = db.get_all_price_data_in_interval(start_time, now)
+    all_subs = []
+    price_changes = []
+    # create list with all subs
+    for coin in coin_name_array:
+        all_subs.append(coin[-1])
+
+    for subreddit in all_subs:
+        # get prices for each sub
+        price_now = 0
+        price_xhrs_ago = 0
+        for line in price_data:
+            if line[0] == subreddit:
+                price_now = line[1]
+                break
+        for line in reversed(price_data):
+            if line[0] == subreddit:
+                price_xhrs_ago = line[1]
+                break
+        # calculate price change
+        if price_now == 0 or price_xhrs_ago == 0:
+            log.warn("No price data for %s. Assuming no stagnation." % (subreddit))
+            price_change = float('inf')
+        else:
+            price_change = (price_now - price_xhrs_ago) / price_xhrs_ago
+        price_changes.append((subreddit, price_change))
+
+    price_changes = sorted(price_changes, key=lambda subr: subr[1])
+    price_changes.reverse()
+    top_gainers = [c[0] for c in price_changes[:DYNAMIC_TOP_NR] ]
+    return [get_symbol_for_sub(coin_name_array, s) for s in subreddit_list if s in top_gainers]
 
 def subreddit_growth_policy(adapter):
     now = datetime.datetime.utcnow()
