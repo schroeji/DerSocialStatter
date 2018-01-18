@@ -14,8 +14,8 @@ GROWTH_HOURS = 24
 # it is considered stagnating
 MIN_HOLD_HOURS = 23
 USE_STAGNATION_DETECTION = True
-STAGNATION_HOURS = 6
-STAGNATION_THRESHOLD = 0.045
+STAGNATION_HOURS = 4
+STAGNATION_THRESHOLD = 0.065
 NEVER_SELL = ["BNB"]
 
 def __sell_and_spendings__(adapter, growths):
