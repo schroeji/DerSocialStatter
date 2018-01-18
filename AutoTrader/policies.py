@@ -52,6 +52,7 @@ def __sell_and_spendings__(adapter, growths):
             if not __stagnation_detection__(subs[0]):
                 sell.remove(symbol)
                 log.info("Not selling %s because its value is rising." % (symbol))
+                non_dust_coins += 1
 
     buy_count = K - non_dust_coins
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
