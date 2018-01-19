@@ -3,8 +3,9 @@ import logging
 
 from settings import general
 
-
+logger = None
 def setup_logger(name, log_file=None, level=logging.INFO):
+    global logger
     """
     Setups logger and logfile.
 
@@ -14,9 +15,10 @@ def setup_logger(name, log_file=None, level=logging.INFO):
     :param level: log level.
     :return: logger
     """
+    if not logger is None:
+        return logger
     if log_file is None:
         log_file = general['log_file']
-
     logger = logging.getLogger(name)
     handler = logging.FileHandler(log_file)
     handler.setLevel(level)
@@ -24,11 +26,11 @@ def setup_logger(name, log_file=None, level=logging.INFO):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(level)
+    # logger.propagate = False
     logging.basicConfig(level=level)
     return logger
 
 log = setup_logger(__name__)
-
 
 def get_reddit_auth():
     with open(general["auth_file"]) as f:
