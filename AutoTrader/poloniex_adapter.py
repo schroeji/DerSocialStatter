@@ -199,12 +199,12 @@ class Poloniex_Adapter(Market_Adapter):
         """
         last_week = datetime.datetime.utcnow() - datetime.timedelta(days=7)
         trades = self.client.returnTradeHistory(start=last_week.timestamp())
-        if len(trades) == 0:
-            return last_week
         dates = []
         for _, trade in trades.items():
             trade_date = datetime.datetime.strptime(trade[0]["date"], '%Y-%m-%d %H:%M:%S')
             dates.append(trade_date)
+        if len(dates) == 0:
+            return last_week
         return max(dates)
 
     def get_last_buy_date(self, symbol):
@@ -219,6 +219,8 @@ class Poloniex_Adapter(Market_Adapter):
             if trade["type"] == "buy":
                 trade_date = datetime.datetime.strptime(trade["date"], '%Y-%m-%d %H:%M:%S')
                 dates.append(trade_date)
+        if len(dates) == 0:
+            return last_week
         return max(dates)
 
     def get_net_worth(self):

@@ -12,6 +12,18 @@ class CoinCap(object):
     def __init__(self):
         self.url = "https://api.coinmarketcap.com/v1/ticker/"
 
+    def get_coin_values_usd(self, coin_amount_dict):
+        """
+        For a dictionary which maps coin to their amount returns a
+        dictionary which maps those coints to the corresponding values in USD.
+        """
+        coin_name_array = list(coin_amount_dict.keys())
+        price_data = self.get_coin_price_data(coin_name_array)
+        d = {}
+        for coin, amount in coin_amount_dict:
+            d[coin] = amount * price_data[coin]
+        return d
+
     def get_coin_names(self, count):
         """
         get the top count crypto coins
