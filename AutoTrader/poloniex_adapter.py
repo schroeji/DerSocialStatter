@@ -234,4 +234,4 @@ class Poloniex_Adapter(Market_Adapter):
         return 0.0001
 
     def can_sell(self, symbol):
-        return self.__get_portfolio_btc_value__()[symbol] > 2* self.get_min_spend()
+        return self.__get_portfolio_btc_value__()[symbol] > (1 + FEE) * self.get_min_spend()
