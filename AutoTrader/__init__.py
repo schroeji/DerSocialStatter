@@ -18,6 +18,7 @@ class AutoTrader():
             raise ValueError("Invalid exchange: {}".format(exchange))
 
     def run(self):
+        log.info("---Trading on %s ---" % (self.adapter.name))
         portfolio = self.adapter.get_portfolio()
         log.info("Owned coins:")
         util.print_price_dict(portfolio, "%-4s %12f")

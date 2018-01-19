@@ -7,6 +7,7 @@ class Market_Adapter(object):
         if not mode in ["ETH", "BTC"]:
             raise ValueError("Invalid mode")
         self.mode = mode
+        self.name = "Generic"
         self.coin_name_array = []
 
     #--------- Buy Operations ---------

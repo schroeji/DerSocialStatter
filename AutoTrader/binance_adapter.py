@@ -19,6 +19,7 @@ class Binance_Adapter(Market_Adapter):
         auth = util.get_binance_auth()
         self.client = Client(**auth)
         self.coin_name_array = util.read_subs_from_file(settings.general["binance_file"])
+        self.name = "Binance"
         self.portfolio = None
         self.portfolio_has_changed = False
 

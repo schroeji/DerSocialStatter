@@ -17,6 +17,7 @@ class Poloniex_Adapter(Market_Adapter):
         Market_Adapter.__init__(self, mode)
         auth = util.get_poloniex_auth()
         self.client = poloniex.Poloniex(**auth)
+        self.name = "Poloniex"
         # timeout for buy, sell orders
         self.timeout = 90
         self.retries = 5
