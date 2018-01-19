@@ -199,6 +199,8 @@ class Poloniex_Adapter(Market_Adapter):
         """
         last_week = datetime.datetime.utcnow() - datetime.timedelta(days=7)
         trades = self.client.returnTradeHistory(start=last_week.timestamp())
+        if len(trades) == 0:
+            return last_week
         dates = []
         for _, trade in trades.items():
             trade_date = datetime.datetime.strptime(trade[0]["date"], '%Y-%m-%d %H:%M:%S')
