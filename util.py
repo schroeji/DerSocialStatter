@@ -136,3 +136,16 @@ def known_subs_for_symbols(coin_name_array, symbols):
         else:
             not_found.append(symbol)
     return (not_found, result)
+
+def get_coin_from_symbol(coin_name_array, symbol):
+    """
+    Returns the coin (i.e. one line of the coin_name_array) corresponding to symbol
+    """
+    for coin in coin_name_array:
+        if coin[-2] == symbol:
+            return coin
+
+def print_price_dict(d, format_string):
+    log = setup_logger(__name__)
+    for name, price in d.items():
+        log.info(format_string % (name, price))

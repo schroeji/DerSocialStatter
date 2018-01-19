@@ -12,16 +12,18 @@ class CoinCap(object):
     def __init__(self):
         self.url = "https://api.coinmarketcap.com/v1/ticker/"
 
-    def get_coin_values_usd(self, coin_amount_dict):
+    def get_coin_values_usd(self, coin_name_array, portfolio):
         """
         For a dictionary which maps coin to their amount returns a
         dictionary which maps those coints to the corresponding values in USD.
         """
-        coin_name_array = list(coin_amount_dict.keys())
         price_data = self.get_coin_price_data(coin_name_array)
         d = {}
-        for coin, amount in coin_amount_dict:
-            d[coin] = amount * price_data[coin]
+        for symb, amount in portfolio.items():
+            for api_coin, price_dict in price_data.items():
+                if price_dict["symbol"] == symb:
+                    d[symb] = amount * float(price_dict["price"])
+                    break
         return d
 
     def get_coin_names(self, count):

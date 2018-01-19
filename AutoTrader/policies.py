@@ -64,7 +64,7 @@ def __sell_and_spendings__(adapter, growths):
                     log.info("Not selling %s because its value is rising." % (symbol))
                     non_dust_coins += 1
 
-    buy_count = K - non_dust_coins
+    buy_count = max(K - non_dust_coins, 0)
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
     for coin in buy_coins:
         if coin in sell:
