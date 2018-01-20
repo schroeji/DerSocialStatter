@@ -14,8 +14,8 @@ GROWTH_HOURS = 24
 # it is considered stagnating
 MIN_HOLD_HOURS = 23
 USE_STAGNATION_DETECTION = True
-STAGNATION_HOURS = 4
-STAGNATION_THRESHOLD = 0.065
+STAGNATION_HOURS = 3
+STAGNATION_THRESHOLD = 0.015
 NEVER_SELL = ["BNB"]
 
 USE_DYNAMIC_STAGNATION_DETECTION = False
@@ -81,6 +81,7 @@ def __sell_and_spendings__(adapter, growths):
     for coin in list(spend.keys()):
         if spend[coin] < adapter.get_min_spend():
             spend.pop(coin, None)
+
     return (sell, spend)
 
 
