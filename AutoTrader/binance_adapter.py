@@ -199,7 +199,6 @@ class Binance_Adapter(Market_Adapter):
         pair = "{}{}".format(symbol, self.mode)
         try:
             filters = self.client.get_symbol_info(pair)["filters"]
-            print(filters)
         except BinanceAPIException  as e:
             log.info(str(e))
             log.info("Waiting 10mins.")
