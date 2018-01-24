@@ -194,3 +194,17 @@ class Binance_Adapter(Market_Adapter):
         if float(filters[2]["minNotional"]) > value:
             return False
         return True
+
+    def can_buy(self, symbol, spend_amount):
+        pair = "{}{}".format(symbol, self.mode)
+        try:
+            filters = self.client.get_symbol_info(pair)["filters"]
+            print(filters)
+        except BinanceAPIException  as e:
+            log.info(str(e))
+            log.info("Waiting 10mins.")
+            time.sleep(600)
+            filters = self.client.get_symbol_info(pair)["filters"]
+        if float(filters[2]["minNotional"]) > spend_amount:
+            return False
+        return True

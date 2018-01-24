@@ -75,13 +75,20 @@ def __sell_and_spendings__(adapter, growths):
                 buy_coins.remove(coin)
     sell_worth = sum([owned_coins[s] for s in sell])
     available_funds = sell_worth + adapter.get_funds()
-    for coin in buy_coins:
-        spend[coin] = available_funds / buy_count
-    # remove buys when total would be under threshold
-    for coin in list(spend.keys()):
-        if spend[coin] < adapter.get_min_spend():
-            spend.pop(coin, None)
 
+    # calculate spendings
+    acceptable = False
+    while not acceptable:
+        acceptable = True
+        for coin in buy_coins:
+            sp = available_funds / buy_count
+            if adapter.can_buy(coin, sp):
+                spend[coin] = sp
+            else: # spend amount too low: remove one coin and try again
+                acceptable = False
+                buy_count -= 1
+                del buy_coins[-1]
+                break
     return (sell, spend)
 
 
@@ -158,7 +165,8 @@ def subreddit_growth_policy(adapter):
     growths.reverse()
     sell, spend = __sell_and_spendings__(adapter, growths[:K])
     log.info("Selling: %s" % (sell))
-    log.info("Buying: %s" % (list(spend.keys())))
+    log.info("Spendings:")
+    util.print_price_dict(spend, "%-4s %12f{}".format(adapter.mode))
     for coin in sell:
         adapter.sell_all(coin)
     for coin, amount in spend.items():
