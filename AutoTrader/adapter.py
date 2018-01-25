@@ -113,6 +113,6 @@ class Market_Adapter(object):
 
     def can_buy(self, symbol, spend_amount):
         """
-        Can symbol be sold or are there any market restrictions (i.e. min value).
+        Can symbol be bought or are there any market restrictions (i.e. min spend).
         """
         return True
