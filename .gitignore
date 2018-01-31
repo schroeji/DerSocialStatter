@@ -3,3 +3,4 @@ auth.json
 __pycache__
 settings.py
 log.log
+*.pyc
