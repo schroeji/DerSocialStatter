@@ -44,7 +44,7 @@ def collect_price(coin_name_array):
     time = datetime.datetime.utcnow()
     price_data = cap.get_coin_price_data(coin_name_array)
     if (len(price_data) != len(coin_name_array)):
-        log.warning("No price data for {} coins!".format(len(coin_name_array) - len(price_data)))
+        log.warning("No price data for {} coins:".format(len(coin_name_array) - len(price_data)))
     for k, d in price_data.items():
         d["time"] = time
         for coin in coin_name_array:

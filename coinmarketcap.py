@@ -36,7 +36,7 @@ class CoinCap(object):
             log.warn("Could not get coin aliases: %s" % (str(e)))
             raise e
         data = json.loads(resp.text)
-        return [ [coin["id"], coin["name"], coin["symbol"]] for coin in data]
+        return [[coin["id"], coin["name"], coin["symbol"]] for coin in data]
 
     def get_coin_price_data(self, coin_name_array):
         """
@@ -55,14 +55,14 @@ class CoinCap(object):
             for api_coin in data:
                 normalized_id = "".join(x for x in api_coin["id"] if x.isalnum()).lower()
                 if (normalized_id in coin) or (api_coin["id"] in coin) or \
-                   (api_coin["name"] in coin) or (api_coin["symbol"] in coin):
+                   (api_coin["name"] in coin):
                     d[normalized_id] = {
-                        "coin_id" : api_coin["id"],
-                        "coin_name" : api_coin["name"],
-                        "symbol" : api_coin["symbol"],
-                        "percent_change_1h" : api_coin["percent_change_1h"],
-                        "percent_change_24h" : api_coin["percent_change_24h"],
-                        "price" : api_coin["price_usd"],
+                        "coin_id": api_coin["id"],
+                        "coin_name": api_coin["name"],
+                        "symbol": api_coin["symbol"],
+                        "percent_change_1h": api_coin["percent_change_1h"],
+                        "percent_change_24h": api_coin["percent_change_24h"],
+                        "price": api_coin["price_usd"],
                     }
                     matched = True
                     break
