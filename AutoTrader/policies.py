@@ -119,7 +119,7 @@ def __stagnation_detection__(subreddit):
 
 def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
     """
-    For a list of coins returns those that are in the last top DYNAMIC_TOP_NR
+    For a list of coins returns those that are among the last top DYNAMIC_TOP_NR
     gainers in the last STAGNATION_HOURS hours.
     """
     now = datetime.datetime.utcnow()
@@ -169,7 +169,7 @@ def subreddit_growth_policy(adapter):
     log.info("Selling: %s" % (sell))
     log.info("Spendings:")
     util.print_price_dict(spend, "%-4s %12f{}".format(adapter.mode))
-    # for coin in sell:
-        # adapter.sell_all(coin)
-    # for coin, amount in spend.items():
-        # adapter.buy_by_symbol(coin, amount)
+    for coin in sell:
+        adapter.sell_all(coin)
+    for coin, amount in spend.items():
+        adapter.buy_by_symbol(coin, amount)
