@@ -31,7 +31,11 @@ class CoinCap(object):
         get the top count crypto coins
         """
         json_url = self.url + "?limit={}".format(count)
-        resp = requests.get(url=json_url)
+        try:
+            resp = requests.get(url=json_url)
+        except requests.exceptions.RequestException as e:
+            log.warn("Could not get coin names: %s" % (str(e)))
+            raise e
         data = json.loads(resp.text)
         return [coin["id"] for coin in data]
 
@@ -40,7 +44,11 @@ class CoinCap(object):
         get the id, name, and symbol of the top count crypto coins
         """
         json_url = "{}?limit={}".format(self.url, count)
-        resp = requests.get(url=json_url)
+        try:
+            resp = requests.get(url=json_url)
+        except requests.exceptions.RequestException as e:
+            log.warn("Could not get coin aliases: %s" % (str(e)))
+            raise e
         data = json.loads(resp.text)
         return [ [coin["id"], coin["name"], coin["symbol"]] for coin in data]
 
@@ -49,7 +57,11 @@ class CoinCap(object):
         get the price data for all coins in coin_name_array
         """
         json_url = "{}?limit={}".format(self.url, 1000)
-        resp = requests.get(url=json_url)
+        try:
+            resp = requests.get(url=json_url)
+        except requests.exceptions.RequestException as e:
+            log.warn("Could not get price data: %s" % (str(e)))
+            raise e
         data = json.loads(resp.text)
         d = {}
         for coin in coin_name_array:

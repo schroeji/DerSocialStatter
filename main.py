@@ -54,8 +54,11 @@ def collect_price(coin_name_array):
             if k in coin:
                 d["subreddit"] = coin[-1]
                 break
-        log.info("Got price for: %s" % (d["subreddit"]))
-        db.insert_price(d)
+        if "subreddit" not in d:
+            log.warning("No subreddit for %s." % (d["coin_name"]))
+        else:
+            log.info("Got price for: %s" % (d["subreddit"]))
+            db.insert_price(d)
     db.close()
 
 def create_coin_name_array(num):

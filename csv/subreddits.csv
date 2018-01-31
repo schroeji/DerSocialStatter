@@ -29,11 +29,11 @@ bytecoinbcn,Bytecoin,BCN,bytecoinbcn
 blockmason,BlockMason Credit Protocol,BCPT,blockmason
 bitcrystals,Bitcrystals,BCY,bitcrystals
 belacoin,Bela,BELA,belacoin
-bitbean,BitBean,BITB,bitbean
+beancash,bean-cash,BITB,bitbean
 blitzcash,Blitzcash,BLITZ,blitzcash
 blackcoin,BlackCoin,BLK,blackcoin
 blocknet,Blocknet,BLOCK,theblocknet
-blackmoon-crypto,Blackmoon Crypto,BMC,blackmooncrypto
+blackmoon,blackmoon-crypto,Blackmoon Crypto,BMC,blackmooncrypto
 binance-coin,binancecoin,Binance Coin,BNB,bnbtrader
 bancor,Bancor,BNT,bancor
 breakout,Breakout,BRK,breakoutcoin
@@ -161,7 +161,7 @@ oax,OAX,OAX,openanx
 omisego,OmiseGO,OMG,omise_go
 omni,Omni,OMNI,omni
 simple-token,simpletoken,Simple Token,OST,simple_token
-open-trading-network,Open Trading Network,OTN,opentradingnetwork
+opentradingnetwork,open-trading-network,Open Trading Network,OTN,open_trading_network
 oxycoin,Oxycoin,OXY,oxycoin
 particl,Particl,PART,particl
 pascal-coin,Pascal Coin,PASC,pascalcoin
