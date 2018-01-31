@@ -18,7 +18,7 @@ STAGNATION_HOURS = 3
 STAGNATION_THRESHOLD = 0.005
 NEVER_SELL = ["BNB"]
 
-USE_DYNAMIC_STAGNATION_DETECTION = False
+USE_DYNAMIC_STAGNATION_DETECTION = True
 DYNAMIC_TOP_NR = 20
 
 def __sell_and_spendings__(adapter, growths):
@@ -53,7 +53,7 @@ def __sell_and_spendings__(adapter, growths):
             dont_sell = __dynamic_stagnation_detection__(db, adapter.coin_name_array, list(sell))
             for symbol in dont_sell:
                 sell.remove(symbol)
-                log.info("Not selling %s because its value is rising." % (symbol))
+                log.info("Not selling %s because its int the TOP %s." % (symbol, DYNAMIC_TOP_NR))
                 non_dust_coins += 1
         else:
             for symbol in list(sell):
@@ -127,9 +127,12 @@ def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
     price_data = db.get_all_price_data_in_interval(start_time, now)
     all_subs = []
     price_changes = []
+    subreddit_list = []
     # create list with all subs
     for coin in coin_name_array:
         all_subs.append(coin[-1])
+        if coin[-2] in symbols:
+            subreddit_list.append(coin[-1])
 
     for subreddit in all_subs:
         # get prices for each sub
@@ -153,12 +156,11 @@ def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
 
     price_changes = sorted(price_changes, key=lambda subr: subr[1])
     price_changes.reverse()
-    top_gainers = [c[0] for c in price_changes[:DYNAMIC_TOP_NR] ]
-    return [get_symbol_for_sub(coin_name_array, s) for s in subreddit_list if s in top_gainers]
+    top_gainers = [c[0] for c in price_changes[:DYNAMIC_TOP_NR]]
+    return [util.get_symbol_for_sub(coin_name_array, s) for s in subreddit_list if s in top_gainers]
 
 def subreddit_growth_policy(adapter):
     now = datetime.datetime.utcnow()
-    last_trade = adapter.get_last_trade_date()
     start_time = now - datetime.timedelta(hours=GROWTH_HOURS)
     subs = [coin[-1] for coin in adapter.get_coins()]
     growths = query.average_growth(db, subs, start_time, now, sort=True)
@@ -167,7 +169,7 @@ def subreddit_growth_policy(adapter):
     log.info("Selling: %s" % (sell))
     log.info("Spendings:")
     util.print_price_dict(spend, "%-4s %12f{}".format(adapter.mode))
-    for coin in sell:
-        adapter.sell_all(coin)
-    for coin, amount in spend.items():
-        adapter.buy_by_symbol(coin, amount)
+    # for coin in sell:
+        # adapter.sell_all(coin)
+    # for coin, amount in spend.items():
+        # adapter.buy_by_symbol(coin, amount)
