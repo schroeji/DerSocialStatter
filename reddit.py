@@ -4,14 +4,15 @@ import re
 import numpy as np
 import praw
 
+import settings
 import util
 from coinmarketcap import CoinCap
-from settings import general
 
 log = util.setup_logger(__name__)
 
 HOUR_IN_SECONDS = 3600
-GENERAL_SUBS = ["cryptocurrency", "cryptotrading", "cryptotrade", "cryptomarkets", "cryptowallstreet", "darknetmarkets", "altcoin"]
+GENERAL_SUBS = settings.reddit["general_subs"]
+
 
 class RedditStats(object):
 
@@ -220,7 +221,7 @@ class RedditStats(object):
         """
         a = util.read_csv(path)
         symbols = [s[0] for s in a]
-        known_coin_name_array = util.read_subs_from_file(general["subreddit_file"])
+        known_coin_name_array = util.read_subs_from_file(settings.general["subreddit_file"])
         not_found, found = util.known_subs_for_symbols(known_coin_name_array, symbols)
         cap = CoinCap()
         coins = cap.get_coin_aliases(1000)

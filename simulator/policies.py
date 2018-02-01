@@ -7,12 +7,12 @@ import query
 import settings
 import util
 
-SCALE_SPENDINGS = False
-K = 4
-STEP_HOURS = 33
-GROWTH_HOURS = 12
+SCALE_SPENDINGS = settings.simulator["scale_spendings"]
+K = settings.simulator["k"]
+STEP_HOURS = settings.simulator["step_hours"]
+GROWTH_HOURS = settings.simulator["growth_hours"]
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
-USE_SMOOTHING = True
+USE_SMOOTHING = settings.simulator["use_smoothing"]
 
 
 def raiblocks_yolo_policy(self, time, step_nr):
