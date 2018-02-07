@@ -3,23 +3,26 @@ import datetime
 import query
 import util
 from database import DatabaseConnection
+from settings import autotrade
 
 log = util.setup_logger(__name__)
 auth = util.get_postgres_auth()
 db = DatabaseConnection(**auth)
 
-K = 4
-GROWTH_HOURS = 24
+K = autotrade["k"]
+GROWTH_HOURS = autotrade["growth_hours"]
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
-MIN_HOLD_HOURS = 13
-USE_STAGNATION_DETECTION = True
-STAGNATION_HOURS = 3
-STAGNATION_THRESHOLD = 0.005
-NEVER_SELL = ["BNB"]
+MIN_HOLD_HOURS = autotrade["min_hold_hours"]
+USE_STAGNATION_DETECTION = autotrade["use_stgnation_detection"]
+STAGNATION_HOURS = autotrade["stagnation_hours"]
+STAGNATION_THRESHOLD = autotrade["stagnation_threshold"]
+NEVER_SELL = autotrade["never_sell"]
 
-USE_DYNAMIC_STAGNATION_DETECTION = True
-DYNAMIC_TOP_NR = 20
+USE_DYNAMIC_STAGNATION_DETECTION = autotrade["use_dynamic_stagnation_detection"]
+DYNAMIC_TOP_NR = autotrade["dynamic_top_nr"]
+DRY_RUN = autotrade["dry_run"]
+
 
 def __sell_and_spendings__(adapter, growths):
     """
@@ -117,6 +120,7 @@ def __stagnation_detection__(subreddit):
         return True
     return False
 
+
 def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
     """
     For a list of coins returns those that are among the last top DYNAMIC_TOP_NR
@@ -159,6 +163,7 @@ def __dynamic_stagnation_detection__(db, coin_name_array, symbols):
     top_gainers = [c[0] for c in price_changes[:DYNAMIC_TOP_NR]]
     return [util.get_symbol_for_sub(coin_name_array, s) for s in subreddit_list if s in top_gainers]
 
+
 def subreddit_growth_policy(adapter):
     now = datetime.datetime.utcnow()
     start_time = now - datetime.timedelta(hours=GROWTH_HOURS)
@@ -169,7 +174,8 @@ def subreddit_growth_policy(adapter):
     log.info("Selling: %s" % (sell))
     log.info("Spendings:")
     util.print_price_dict(spend, "%-4s %12f{}".format(adapter.mode))
-    for coin in sell:
-        adapter.sell_all(coin)
-    for coin, amount in spend.items():
-        adapter.buy_by_symbol(coin, amount)
+    if not DRY_RUN:
+        for coin in sell:
+            adapter.sell_all(coin)
+        for coin, amount in spend.items():
+            adapter.buy_by_symbol(coin, amount)

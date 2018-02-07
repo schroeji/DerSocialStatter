@@ -26,3 +26,16 @@ simulator = dict(
     growth_hours = 12,
     use_smoothing = True
 )
+
+autotrade = dict(
+    k = 4,
+    growth_hours = 24,
+    min_hold_hours = 7,
+    use_stagnation_detection = True,
+    stagnation_hours = 3,
+    stagnation_threshold = 0.005,
+    never_sell = ["BNB"],
+    use_dynamic_stgnation_detection = True,
+    dynamic_top_nr = 20,
+    dry_run = True
+)
