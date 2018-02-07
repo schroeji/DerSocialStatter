@@ -69,7 +69,7 @@ def __sell_and_spendings__(adapter, growths):
 
     buy_count = max(K - len(non_dust_coins), 0)
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
-    backup = growths[buy_count:]
+    backup = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[buy_count:]]
     print(buy_coins)
     print(backup)
     for coin in list(buy_coins):
