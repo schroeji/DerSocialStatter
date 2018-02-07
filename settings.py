@@ -13,12 +13,14 @@ general = dict(
     auth_file=os.path.join(filedir, "auth.json"),
 )
 
+#reddit settings
 reddit = dict(
     general_subs=["cryptocurrency", "cryptotrading",
                   "cryptotrade", "cryptomarkets",
                   "cryptowallstreet", "darknetmarkets", "altcoin"]
 )
 
+#simulator settings
 simulator = dict(
     scale_spendings=False,
     k=4,
@@ -27,6 +29,7 @@ simulator = dict(
     use_smoothing=True
 )
 
+#autotrader settings
 autotrade = dict(
     k=4,
     growth_hours=24,

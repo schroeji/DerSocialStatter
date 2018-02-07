@@ -70,8 +70,6 @@ def __sell_and_spendings__(adapter, growths):
     buy_count = max(K - len(non_dust_coins), 0)
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
     backup = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[buy_count:]]
-    print(buy_coins)
-    print(backup)
     for coin in list(buy_coins):
         if coin in sell:
             if adapter.can_sell(coin):
@@ -80,8 +78,10 @@ def __sell_and_spendings__(adapter, growths):
                 sell.remove(coin)
                 buy_coins.remove(coin)
         elif coin in non_dust_coins:
+            log.info("Already owning %s %s of %s" % (owned_coins[coin], adapter.mode, coin))
             buy_coins.remove(coin)
-            buy_coins.append(backup.pop())
+            buy_coins.append(backup.pop(0))
+            log.info("Buying %s instead." % (buy_coins[-1]))
     sell_worth = sum([owned_coins[s] for s in sell])
     available_funds = sell_worth + adapter.get_funds()
 
@@ -94,6 +94,7 @@ def __sell_and_spendings__(adapter, growths):
             if adapter.can_buy(coin, sp):
                 spend[coin] = sp
             else:  # spend amount too low: remove one coin and try again
+                log.info("Spend amount too low. Removing %s." % (buy_coins[-1]))
                 acceptable = False
                 buy_count -= 1
                 del buy_coins[-1]
