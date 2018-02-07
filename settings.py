@@ -35,7 +35,7 @@ autotrade = dict(
     stagnation_hours = 3,
     stagnation_threshold = 0.005,
     never_sell = ["BNB"],
-    use_dynamic_stgnation_detection = True,
+    use_dynamic_stagnation_detection = True,
     dynamic_top_nr = 20,
     dry_run = True
 )
