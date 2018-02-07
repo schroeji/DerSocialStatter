@@ -7,12 +7,12 @@ import query
 import settings
 import util
 
-SCALE_SPENDINGS = False
-K = 4
-STEP_HOURS = 13
-GROWTH_HOURS = 24
+SCALE_SPENDINGS = settings.simulator["scale_spendings"]
+K = settings.simulator["k"]
+STEP_HOURS = settings.simulator["step_hours"]
+GROWTH_HOURS = settings.simulator["growth_hours"]
 #if SCALE_SPENDINGS = True this will prevent errors for negative growths/gains
-USE_SMOOTHING = True
+USE_SMOOTHING = settings.simulator["use_smoothing"]
 
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
