@@ -41,7 +41,7 @@ def __sell_and_spendings__(adapter, growths):
     sell = [s for s in sell if s not in NEVER_SELL]
     # dont sell when total would be under threshold or not held long enough
     at_least_owned_since = datetime.datetime.utcnow() - datetime.timedelta(hours=MIN_HOLD_HOURS)
-    non_dust_coins = 0
+    non_dust_coins = []
     for coin in list(sell):
         if not adapter.can_sell(coin):
             log.info("Not selling %s because market does not allow it." % (coin))
@@ -49,15 +49,15 @@ def __sell_and_spendings__(adapter, growths):
         elif adapter.get_last_buy_date(coin) > at_least_owned_since:
             log.info("Not selling %s because it is not owned since more than %shrs." % (coin, MIN_HOLD_HOURS))
             sell.remove(coin)
-            non_dust_coins += 1
+            non_dust_coins.append(coin)
     # dont sell those coins which are not stagnating
     if USE_STAGNATION_DETECTION:
         if USE_DYNAMIC_STAGNATION_DETECTION:
             dont_sell = __dynamic_stagnation_detection__(db, adapter.coin_name_array, list(sell))
             for symbol in dont_sell:
                 sell.remove(symbol)
-                log.info("Not selling %s because its int the TOP %s." % (symbol, DYNAMIC_TOP_NR))
-                non_dust_coins += 1
+                log.info("Not selling %s because its in the TOP %s." % (symbol, DYNAMIC_TOP_NR))
+                non_dust_coins.append(coin)
         else:
             for symbol in list(sell):
                 subs = util.get_subs_for_symbol(adapter.coin_name_array, symbol)
@@ -65,17 +65,23 @@ def __sell_and_spendings__(adapter, growths):
                 if not __stagnation_detection__(subs[0]):
                     sell.remove(symbol)
                     log.info("Not selling %s because its value is rising." % (symbol))
-                    non_dust_coins += 1
+                    non_dust_coins.append(coin)
 
-    buy_count = max(K - non_dust_coins, 0)
+    buy_count = max(K - len(non_dust_coins), 0)
     buy_coins = [util.get_symbol_for_sub(adapter.get_coins(), g[0]) for g in growths[:buy_count]]
-    for coin in buy_coins:
+    backup = growths[buy_count:]
+    print(buy_coins)
+    print(backup)
+    for coin in list(buy_coins):
         if coin in sell:
             if adapter.can_sell(coin):
                 log.info("Already owning %s %s of %s" % (owned_coins[coin], adapter.mode, coin))
                 log.info("Prevented sell and rebuy")
                 sell.remove(coin)
                 buy_coins.remove(coin)
+        elif coin in non_dust_coins:
+            buy_coins.remove(coin)
+            buy_coins.append(backup.pop())
     sell_worth = sum([owned_coins[s] for s in sell])
     available_funds = sell_worth + adapter.get_funds()
 
@@ -87,7 +93,7 @@ def __sell_and_spendings__(adapter, growths):
             sp = available_funds / buy_count
             if adapter.can_buy(coin, sp):
                 spend[coin] = sp
-            else: # spend amount too low: remove one coin and try again
+            else:  # spend amount too low: remove one coin and try again
                 acceptable = False
                 buy_count -= 1
                 del buy_coins[-1]
