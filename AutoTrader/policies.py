@@ -26,9 +26,9 @@ DRY_RUN = autotrade["dry_run"]
 
 def __sell_and_spendings__(adapter, growths):
     """
-    Calculates which coins to sell and how much o spend on other coins based on a dict of growths and subreddits.
+    Calculates which coins to sell and how much to spend on other coins based on a dict of growths and subreddits.
     """
-    assert len(growths) == K
+    assert len(growths) >= K
     owned_coins = adapter.get_portfolio_funds_value()
     owned_coins.pop(adapter.mode, None)
     spend = {}
@@ -176,7 +176,7 @@ def subreddit_growth_policy(adapter):
     subs = [coin[-1] for coin in adapter.get_coins()]
     growths = query.average_growth(db, subs, start_time, now, sort=True)
     growths.reverse()
-    sell, spend = __sell_and_spendings__(adapter, growths[:K])
+    sell, spend = __sell_and_spendings__(adapter, growths)
     log.info("Selling: %s" % (sell))
     log.info("Spendings:")
     util.print_price_dict(spend, "%-4s %12f{}".format(adapter.mode))
