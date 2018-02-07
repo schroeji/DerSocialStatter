@@ -177,7 +177,7 @@ def subreddit_growth_policy(adapter):
     subs = [coin[-1] for coin in adapter.get_coins()]
     growths = query.average_growth(db, subs, start_time, now, sort=True)
     growths.reverse()
-    print(growths)
+    log.info(growths)
     sell, spend = __sell_and_spendings__(adapter, growths)
     log.info("Selling: %s" % (sell))
     log.info("Spendings:")

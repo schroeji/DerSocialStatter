@@ -40,5 +40,5 @@ autotrade = dict(
     never_sell=["BNB"],
     use_dynamic_stagnation_detection=True,
     dynamic_top_nr=20,
-    dry_run=True
+    dry_run=False
 )
