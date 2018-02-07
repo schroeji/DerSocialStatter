@@ -14,7 +14,7 @@ GROWTH_HOURS = autotrade["growth_hours"]
 # if a coin has less than STAGNATION_THRESHOLD price growth in STAGNATION_HOURS hours
 # it is considered stagnating
 MIN_HOLD_HOURS = autotrade["min_hold_hours"]
-USE_STAGNATION_DETECTION = autotrade["use_stgnation_detection"]
+USE_STAGNATION_DETECTION = autotrade["use_stagnation_detection"]
 STAGNATION_HOURS = autotrade["stagnation_hours"]
 STAGNATION_THRESHOLD = autotrade["stagnation_threshold"]
 NEVER_SELL = autotrade["never_sell"]
