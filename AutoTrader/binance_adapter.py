@@ -176,6 +176,8 @@ class Binance_Adapter(Market_Adapter):
             log.info("Waiting 10mins.")
             time.sleep(600)
             trades = self.client.get_my_trades(symbol=pair)
+        if(len(trades) == 0):    # Never bought this coin
+            return datetime.datetime.fromtimestamp(0)
         max_ts = max([float(trade["time"]) for trade in trades if bool(trade["isBuyer"])])
         latest_timestamp = max(max_ts, latest_timestamp)
         return datetime.datetime.fromtimestamp(latest_timestamp / 1000)
