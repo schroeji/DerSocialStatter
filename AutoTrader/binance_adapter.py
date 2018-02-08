@@ -102,6 +102,7 @@ class Binance_Adapter(Market_Adapter):
         balances = self.get_portfolio_funds_value()
         return sum([float(b) for b in balances.values()])
 
+
     def get_portfolio_funds_value(self):
         """
         Returns all non-zero entries of the portfolio with the corresponding self.mode values.
@@ -109,12 +110,12 @@ class Binance_Adapter(Market_Adapter):
         portfolio = {}
         balances = self.get_portfolio()
         try:
-            tickers = self.client.get_all_tickers()
-        except BinanceAPIException  as e:
+            tickers = self.client.get_orderbook_tickers()
+        except BinanceAPIException as e:
             log.info(str(e))
             log.info("Waiting 10mins.")
             time.sleep(600)
-            tickers = self.client.get_all_tickers()
+            tickers = self.client.get_orderbook_tickers()
         for coin, amount in balances.items():
             if coin == self.mode:
                 portfolio[coin] = amount
@@ -122,8 +123,9 @@ class Binance_Adapter(Market_Adapter):
             pair = "{}{}".format(coin, self.mode)
             for ticker in tickers:
                 if ticker["symbol"] == pair:
-                    portfolio[coin] = amount * float(ticker["price"])
+                    portfolio[coin] = amount * float(ticker["bidPrice"])
         return portfolio
+
 
     def get_portfolio(self):
         """

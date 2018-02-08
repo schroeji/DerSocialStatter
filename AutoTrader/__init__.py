@@ -5,6 +5,7 @@ from coinmarketcap import CoinCap
 
 log = util.setup_logger(__name__)
 
+
 class AutoTrader():
     def __init__(self, exchange):
         if exchange.lower() == "poloniex":
