@@ -5,13 +5,15 @@ This is a mini demo of how to use numpy arrays and plot data.
 NOTE: the operators + - * / are element wise operation. If you want
 matrix multiplication use ‘‘dot‘‘ or ‘‘mdot‘‘!
 """
+import functools
+
+import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy import dot
 from numpy.linalg import inv
-import matplotlib.pyplot as plt
-import functools
+
 import util
-from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 
 # 3D plotting
@@ -147,5 +149,5 @@ for row in X:
     x = np.insert(x, 0, 1.0)
     pred = np.dot(beta_, x)
     preds.append([row[0], pred])
-sorted_preds= sorted(preds, key=lambda x: x[1])
+sorted_preds = sorted(preds, key=lambda x: x[1])
 print(sorted_preds)
