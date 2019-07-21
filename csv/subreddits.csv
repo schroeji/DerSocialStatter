@@ -1,4 +1,3 @@
-firstblood,FirstBlood,1ST,firstbloodcoin
 2give,2GIVE,2GIVE,2give
 artbyte,ArtByte,ABY,artbyte
 cardano,Cardano,ADA,cardano
@@ -53,7 +52,6 @@ clams,Clams,CLAM,clamcoin
 cloakcoin,CloakCoin,CLOAK,cloak_coin
 cybermiles,CyberMiles,CMT,cybermiles
 cindicator,Cindicator,CND,cindicator
-circuitsofvalue,Circuits of Value,COVAL,coval
 creditbit,Creditbit,CRB,creditbit
 crown,Crown,CRW,crown
 centra,Centra,CTR,centratech
@@ -71,7 +69,6 @@ encrypgen,EncrypGen,DNA,encrypgen
 district0x,district0x,DNT,district0x
 dogecoin,Dogecoin,DOGE,dogecoin
 dopecoin,DopeCoin,DOPE,dopecoin
-domraider,DomRaider,DRT,domraider
 eboostcoin,eBoost,EBST,eboost
 edgeless,Edgeless,EDG,edgeless
 eidoo,Eidoo,EDO,eidoo
@@ -134,7 +131,6 @@ litecoin,Litecoin,LTC,litecoin
 lunyr,Lunyr,LUN,lunyr
 maidsafecoin,MaidSafeCoin,MAID,maidsafecoin
 decentraland,Decentraland,MANA,decentraland
-monaco,Monaco,MCO,monacocard
 memetic,Memetic / PepeCoin,MEME,memetic
 iota,IOTA,MIOTA,iota
 minexcoin,MinexCoin,MNX,minexcoin
@@ -177,12 +173,10 @@ populous,Populous,PPT,populous_platform
 primas,Primas,PST,primas
 pesetacoin,Pesetacoin,PTC,officialpesetacoin
 patientory,Patientory,PTOY,ptoy
-qash,QASH,QASH,qash
 quantumresistantledger,Quantum Resistant Ledger,QRL,qrl
 quantstamp,Quantstamp,QSP,quantstamp
 qtum,Qtum,QTUM,qtum
 radium,Radium,RADS,radiumcrypto
-rubycoin,Rubycoin,RBY,rubycoin
 ripio-credit-network,Ripio Credit Network,RCN,ripiocreditnetwork
 reddcoin,ReddCoin,RDD,reddcoin
 raiden-network-token,raidennetworktoken,Raiden Network Token,RDN,raidennetwork
@@ -259,7 +253,6 @@ ripple,Ripple,XRP,ripple
 stealthcoin,Stealthcoin,XST,stealthcoin
 exchange-union,Exchange Union,XUC,exchangeunion
 vcash,Vcash,XVC,vcash
-verge,Verge,XVG,verge
 whitecoin,WhiteCoin,XWC,whitecoin
 zcoin,ZCoin,XZC,zcoin
 zclassic,ZClassic,ZCL,zclassic

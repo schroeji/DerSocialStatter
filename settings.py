@@ -17,7 +17,7 @@ general = dict(
 reddit = dict(
     general_subs=["cryptocurrency", "cryptotrading",
                   "cryptotrade", "cryptomarkets",
-                  "cryptowallstreet", "darknetmarkets", "altcoin"]
+                  "cryptowallstreet", "altcoin"]
 )
 
 #simulator settings
@@ -37,7 +37,8 @@ autotrade = dict(
     use_stagnation_detection=True,
     stagnation_hours=3,
     stagnation_threshold=0.005,
-    never_sell=["BNB", "XRB", "NANO"],
+    # never_sell=["BNB", "XRB", "NANO"],
+    never_sell=[],
     use_dynamic_stagnation_detection=True,
     dynamic_top_nr=20,
     dry_run=False

@@ -1,3 +1,4 @@
+#!/bin/python
 import argparse
 import datetime
 import os
@@ -29,6 +30,7 @@ def collect(coin_name_array, hours=12):
     log.info("Got mentions for all subs.")
     for i, coin_tuple in enumerate(coin_name_array):
         subreddit = coin_tuple[-1]
+        # print(subreddit)
         stats_dict = stat.compile_dict(subreddit, hours=hours)
         stats_dict["mention_rate"] = mentions[0][i]
         stats_dict["mention_rate_1h"] = mentions[1][i]

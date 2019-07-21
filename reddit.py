@@ -41,9 +41,10 @@ class RedditStats(object):
         if end is None:
             end = self.default_end
         start_one = end - datetime.timedelta(hours=1)
-        submissions_x_h = [s for s in self.reddit.subreddit(subreddit).submissions(start.timestamp(), end.timestamp())]
-        num_submission_x_h = len(submissions_x_h)
-        num_submission_one_h = len([s for s in submissions_x_h if s.created_utc > start_one.timestamp()])
+        submissions_new = [s for s in self.reddit.subreddit(subreddit).new()]
+        # assumes there were less than 100 submissions in the last x hours
+        num_submission_x_h = len([s for s in submissions_new if s.created_utc > start.timestamp() and s.created_utc < end.timestamp()])
+        num_submission_one_h = len([s for s in submissions_new if s.created_utc > start_one.timestamp() and s.created_utc < end.timestamp()])
         num_per_h_in_x_h = float(num_submission_x_h)/np.abs(int(end.timestamp()) - int(start.timestamp()))*HOUR_IN_SECONDS
         return (num_per_h_in_x_h, num_submission_one_h)
 
@@ -56,26 +57,26 @@ class RedditStats(object):
         else:
             start = self.default_end - datetime.timedelta(hours=hours)
         start_one = self.default_end - datetime.timedelta(hours=1)
-        try:
-            comm = self.reddit.subreddit(subreddit).comments(limit=1024)
-        except:
-            log.warn("Could not get comment rate for subreddit: %s. It may be private or banned."
-                     % (subreddit))
-            return (0, 0)
+        comm = self.reddit.subreddit(subreddit).comments(limit=1024)
+
         cntagg = 0
         cntone = 0
         exit_by_break = False
-        for c in comm:
-            if c.created_utc > self.default_end.timestamp():
-                continue
-            cntagg += 1
-            if c.created_utc > int(start_one.timestamp()):
-                cntone += 1
-            if c.created_utc < int(start.timestamp()):
-                exit_by_break = True
-                break
-            last_created = c.created_utc
-
+        try:
+            for c in comm:
+                if c.created_utc > self.default_end.timestamp():
+                    continue
+                cntagg += 1
+                if c.created_utc > int(start_one.timestamp()):
+                    cntone += 1
+                if c.created_utc < int(start.timestamp()):
+                    exit_by_break = True
+                    break
+                last_created = c.created_utc
+        except:
+            log.warn("Could not get comment rate for subreddit: %s. It may be private or banned."
+                     % (subreddit))
+            return (None, None)
         if cntagg <= 1:
             comments_per_sec_in_x_h = 0.
         else:
@@ -161,11 +162,16 @@ class RedditStats(object):
             hours = self.hours
         d = {}
         comment_rates =  self.get_num_comments_per_hour(subreddit, hours=hours)
-        submission_rates = self.get_num_submissions_per_hour(subreddit, hours=hours)
+        if comment_rates == (None, None):
+            submission_rates = (None, None)
+            subscribers = None
+        else:
+            submission_rates = self.get_num_submissions_per_hour(subreddit, hours=hours)
+            subscribers = self.get_num_subscribers(subreddit)
         d["time"] = datetime.datetime.fromtimestamp(int(self.default_end.timestamp()))
         d["hours"] = hours
         d["subreddit"] = subreddit
-        d["subscribers"] = self.get_num_subscribers(subreddit)
+        d["subscribers"] = subscribers
         d["submission_rate"] = submission_rates[0]
         d["comment_rate"] = comment_rates[0]
         d["submission_rate_1h"] = submission_rates[1]

@@ -1,6 +1,5 @@
 import util
-from AutoTrader import (binance_adapter, bittrex_adapter, policies,
-                        poloniex_adapter)
+from AutoTrader import binance_adapter, policies
 from coinmarketcap import CoinCap
 
 log = util.setup_logger(__name__)
@@ -9,8 +8,10 @@ log = util.setup_logger(__name__)
 class AutoTrader():
     def __init__(self, exchange):
         if exchange.lower() == "poloniex":
+            from AutoTrader import poloniex_adapter
             self.adapter = poloniex_adapter.Poloniex_Adapter()
         elif exchange.lower() == "bittrex":
+            from AutoTrader import bittrex_adapter
             self.adapter = bittrex_adapter.Bittrex_Adapter()
         elif exchange.lower() == "binance":
             self.adapter = binance_adapter.Binance_Adapter()
