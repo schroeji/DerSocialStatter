@@ -3,8 +3,6 @@ import argparse
 import datetime
 import os
 
-import matplotlib.pyplot as plt
-
 import AutoTrader
 import simulator
 import util
@@ -129,6 +127,7 @@ def main():
             log.warn("Run --find_subs first.")
 
     if args.run_sim:
+        import matplotlib.pyplot as plt
         minute_offsets = range(60, 500, 43)
         for minute_offset in minute_offsets:
             end_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=minute_offset)
